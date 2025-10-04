@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="renderer" content="webkit">
+		<meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width,viewport-fit=cover">
+		<title>{{ &title }}</title>
+		<meta name="keywords" content="{{ &keyWords }}" />
+		<meta name="description" content="{{ &OPT.siteDescription }}" />
+		<link rel='stylesheet' id='stylesheet-css' href='{{ &OPT.theme_github_path }}JustNews/files/main.css' type='text/css' media='all' />
+		<link rel='stylesheet' id='font-awesome-css' href='{{ &OPT.theme_github_path }}JustNews/files/font-awesome.css?ver=6.1.2' type='text/css' media='all' />
+		<link rel='stylesheet' id='wp-block-library-css' href='{{ &OPT.theme_github_path }}JustNews/files/style.min.css?ver=5.6' type='text/css' media='all' />
+		<link rel='stylesheet' id='wp-components-css' href='{{ &OPT.theme_github_path }}JustNews/files/style.min1.css?ver=5.6' type='text/css' media='all' />
+		<link rel='stylesheet' id='wp-editor-font-css' href='{{ &OPT.theme_github_path }}JustNews/files/noto+serif.css?ver=5.6' type='text/css' media='all' />
+		<link rel='stylesheet' id='wp-block-editor-css' href='{{ &OPT.theme_github_path }}JustNews/files/style.min2.css?ver=5.6' type='text/css' media='all' />
+		<link rel='stylesheet' id='wp-nux-css' href='{{ &OPT.theme_github_path }}JustNews/files/style.min3.css?ver=5.6' type='text/css' media='all' />
+		<link rel='stylesheet' id='wp-editor-css' href='{{ &OPT.theme_github_path }}JustNews/files/style.min4.css?ver=5.6' type='text/css' media='all' />
+		<link rel='stylesheet' id='mux_video_block_style-css' href='{{ &OPT.theme_github_path }}JustNews/files/mediacloud-mux.blocks.style.min.css' type='text/css' media='all' />
+		<link rel="stylesheet" href="{{ &OPT.theme_github_path }}JustNews/files/fonts/fontawesome5pro-all.min.css">		
+		<link rel='stylesheet' id='emojify-css' href='{{ &OPT.theme_github_path }}JustNews/files/emojify.min.css?ver=1.1.0' type='text/css' media='all' />
+		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/jquery.min.js?ver=3.5.1' id='jquery-core-js'></script>
+		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/jquery-migrate.min.js?ver=3.3.2' id='jquery-migrate-js'></script>
+		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/icons-2.6.4.js?ver=6.1.2' id='wpcom-icons-js'></script>
+		<link rel="stylesheet" href="{{ &OPT.theme_github_path }}JustNews/files/tomorrow-night-bright.min.css">
+		<script src='{{ &OPT.theme_github_path }}JustNews/files/highlight.min.js'></script>
+		{{ &OPT.codeBeforHead }}
+        <style>
+            #comment-section{margin-top:20px;border-top:1px solid #eee;padding-top:20px}#new-comment{width:100%;padding:10px;border:1px solid #ccc;border-radius:4px;resize:vertical;min-height:100px;margin-bottom:10px}#submit-comment{background-color:#337ab7;color:#fff;padding:10px 15px;border:none;border-radius:4px;cursor:pointer}#submit-comment:hover{background-color:#286090}#comments-container{margin-top:20px}.comment{border-bottom:1px solid #eee;padding:10px 0;word-wrap:break-word;}.comment p{margin:0}.comment small{color:#999;display:block;margin-top:5px}
+        </style>
+	</head>
+	<body class="archive paged category category-zhishi category-5 paged-2 category-paged-2 lang-cn el-boxed">
+		<header class="header">
+            </header>
+		<div id="wrap">
+			<div class="container wrap">
+				<div class="main">
+					<article id="post-{{ &articleSingle.id }}" class="post-{{ &articleSingle.id }} post type-post status-publish format-standard has-post-thumbnail hentry ">
+						<div class="entry">
+							<div class="entry-head">
+                                </div>
+							<div class="entry-content">
+								{{ &articleSingle.contentHtml }}
+							</div>
+							<div class="entry-footer">
+                                </div>
+							<div id="comments" class="entry-comments">
+								{{ &OPT.commentCode }}
+                                <div id="comment-section">
+                                    <h3>发表评论</h3>
+                                    <textarea id="new-comment" class="form-control" placeholder="请输入您的评论..."></textarea>
+                                    <button id="submit-comment" class="btn btn-primary">提交</button>
+                                    <div id="comments-container">
+                                        </div>
+                                </div>
+                                </div>
+						</div>
+					</article>
+				</div>
+				<aside class="sidebar">
+                    </aside>
+			</div>
+		</div>
+		<footer class="footer">
+            </footer>
+		<div class="action action-style-0 action-color-0 action-pos-0" style="bottom:20%;">
+            </div>
+        <script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/emojify.min.js?ver=1.1.0' id='emojify-js'></script>
+		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/wp-embed.js?ver=6.1.2' id='wp-embed-js'></script>
+		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/lazySizesConfig.js?ver=3.4.9' id='lazysizes-config-js'></script>
+		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/ls.unveilhooks.min.js?ver=5.6' id='unveilhooks-js'></script>
+		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/ls.bgset.min.js?ver=5.6' id='bgset-js'></script>
+		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/lazysizes.min.js?ver=5.6' id='lazysizes-js'></script>
+		<script type='text/javascript' id='fifu-image-js-js-extra'>/* ... */</script>
+		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/image.js?ver=3.4.9' id='fifu-image-js-js'></script>
+		<script id="module-toc"> /* ... */ </script> 
+        <script id="module-clipboard"> /* ... */ </script>
+		<script id="module-emojify"> /* ... */ </script>
+		<script>hljs.initHighlightingOnLoad();</script>
+        <script>
+            // 使用您文件中的jQuery来编写
+            $(document).ready(function() {
+                var commentsContainer = $('#comments-container');
+                var newCommentTextarea = $('#new-comment');
+                var submitButton = $('#submit-comment');
+                var articleSlug = "{{ &articleSingle.url }}".split('/').filter(Boolean).pop();
+
+                function appendComment(comment) {
+                    var el = $('<div class="comment"></div>');
+                    var p = $('<p></p>').text(comment.content);
+                    var small = $('<small></small>').text('发表于 ' + new Date(comment.timestamp).toLocaleString());
+                    el.append(p).append(small);
+                    commentsContainer.append(el);
+                }
+
+                function loadComments() {
+                    $.ajax({
+                        url: '/api/comments/' + articleSlug,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(comments) {
+                            commentsContainer.empty();
+                            $.each(comments, function(i, comment) {
+                                appendComment(comment);
+                            });
+                        }
+                    });
+                }
+
+                submitButton.click(function() {
+                    var text = newCommentTextarea.val();
+                    if ($.trim(text) === '') return;
+                    
+                    $.ajax({
+                        url: '/api/comments/' + articleSlug,
+                        type: 'POST',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({ content: text }),
+                        dataType: 'json',
+                        success: function(newComment) {
+                            appendComment(newComment);
+                            newCommentTextarea.val('');
+                        }
+                    });
+                });
+
+                loadComments();
+            });
+        </script>
+		{{ &OPT.codeBeforBody }}
+	</body>
+</html>
