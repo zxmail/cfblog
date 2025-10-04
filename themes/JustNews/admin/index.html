@@ -319,39 +319,45 @@
         const ADMIN_USERNAME = "admin"; 
         const ADMIN_PASSWORD = "123456";
 
+        // 登录表单提交事件
         loginForm.addEventListener('submit', function(event) {
             event.preventDefault(); 
             const enteredUsername = usernameInput.value;
             const enteredPassword = passwordInput.value;
             if (enteredUsername === ADMIN_USERNAME && enteredPassword === ADMIN_PASSWORD) {
+                // **核心修复：登录成功后，设置后端需要的cookie**
+                document.cookie = "password=" + enteredPassword + ";path=/";
                 sessionStorage.setItem('isAdminLoggedIn', 'true');
                 loginWrapper.style.display = 'none';
+                // 登录成功后重新加载页面，确保所有后台请求都带上新cookie
+                location.reload(); 
             } else {
                 alert('用户名或密码错误！');
             }
         });
 
+        // 退出登录按钮
         logoutButton.addEventListener('click', function(event) {
             event.preventDefault();
             sessionStorage.removeItem('isAdminLoggedIn');
+            // 清除cookie
+            document.cookie = "password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             usernameInput.value = ''; 
             passwordInput.value = '';
             loginWrapper.style.display = 'flex';
         });
 
+        // 页面加载时检查登录状态
         if (sessionStorage.getItem('isAdminLoggedIn') !== 'true') {
             loginWrapper.style.display = 'flex';
         }
 		// --- END: 登录逻辑 ---
 
 		$('#myTab li:eq(0) 1').tab('show');
-		//获取分类
 		var categoryJson = [];
-		//获取菜单
 		var menuJson = [];
 		var linkJson = [];
 
-		// 初始化TinyMCE编辑器
 		tinymce.init({
 			selector: '#content',
 			language: 'zh_CN',
@@ -360,7 +366,6 @@
 			toolbar: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | print preview media | forecolor backcolor emoticons',
 		});
 
-		//表单赋值
 		$('#createDate').val(new Date().toISOString().slice(0, 16));
 		$('#WidgetCategory').val(JSON.stringify(categoryJson));
 		$('#WidgetMenu').val(JSON.stringify(menuJson));
