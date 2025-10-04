@@ -249,14 +249,12 @@
 <script src="{{ &OPT.theme_github_path }}JustNews/files/tinymce/langs/zh_CN.js"></script>
 <script type="text/javascript">
 	$(function() {
-        // --- 登录逻辑 ---
         const loginWrapper = document.getElementById('login-wrapper');
         const loginForm = document.getElementById('login-form');
         const passwordInput = document.getElementById('admin-password');
         const logoutButton = document.getElementById('logout-button');
         const adminContainer = document.getElementById('admin-container');
 
-        // 登录表单提交事件
         loginForm.addEventListener('submit', function(event) {
             event.preventDefault(); 
             const enteredPassword = passwordInput.value;
@@ -265,7 +263,6 @@
 			checkLoginStatus();
         });
 
-        // 退出登录按钮
         logoutButton.addEventListener('click', function(event) {
             event.preventDefault();
             sessionStorage.removeItem('isAdminLoggedIn');
@@ -274,12 +271,10 @@
             checkLoginStatus();
         });
 
-        // 检查登录状态的函数
         function checkLoginStatus() {
              if (sessionStorage.getItem('isAdminLoggedIn') === 'true') {
                 loginWrapper.style.display = 'none';
                 adminContainer.style.display = 'flex';
-				// 登录成功后加载数据
 				loadInitialData();
             } else {
                 loginWrapper.style.display = 'flex';
@@ -287,11 +282,13 @@
             }
         }
 		
-		// 页面加载时立即检查
         checkLoginStatus();
 
-		// --- 数据加载和初始化 ---
+		var isDataLoaded = false;
 		function loadInitialData() {
+			if (isDataLoaded) return;
+			isDataLoaded = true;
+
 			tinymce.init({
 				selector: '#content',
 				language: 'zh_CN',
@@ -302,27 +299,16 @@
 
 			$('#createDate').val(new Date().toISOString().slice(0, 16));
 			
-			// 从模板变量加载设置
-			try {
-				var initialCategories = {{{widgetCategoryList}}};
-				renderCategories(initialCategories);
-			} catch(e) { renderCategories([]); }
+			// [FIXED] Correctly parse the raw JSON string passed from the backend
+			var initialCategories = {{& widgetCategoryList }};
+			var initialMenu = {{& widgetMenuList }};
+			var initialLink = {{& widgetLinkList }};
 
-			try {
-				var initialMenu = {{{widgetMenuList}}};
-				$('#WidgetMenu').val(JSON.stringify(initialMenu, null, 2));
-			} catch(e) { $('#WidgetMenu').val("[]");}
-
-			try {
-				var initialLink = {{{widgetLinkList}}};
-				$('#WidgetLink').val(JSON.stringify(initialLink, null, 2));
-			} catch(e) { $('#WidgetLink').val("[]");}
-
-
-			// 更新分类下拉选择器
-			updateCategoryDropdown(initialCategories);
+			renderCategories(initialCategories);
+			$('#WidgetMenu').val(JSON.stringify(initialMenu, null, 2));
+			$('#WidgetLink').val(JSON.stringify(initialLink, null, 2));
 			
-			// 加载文章列表
+			updateCategoryDropdown(initialCategories);
 			$("#loadmore").click();
 		}
 
@@ -338,7 +324,6 @@
 		}
 	});
 
-	//加载文章列表
 	$("#loadmore").click(function(){
 		var page=$("#page").val();
 		$.ajax({
@@ -349,76 +334,44 @@
 				if(data && data.length > 0) {
 					var tableContent="";
 					$.each(data,function(i, Info){
-						tableContent += '<tr><td>'+Info.id+'</td><td><a href="/admin/edit.html?id='+Info.id+'" target="_blank">'+Info.title+'</a></td><td>'+(Info.createDate ? Info.createDate.replace("T"," ") : '')+'</td></tr>';
+						tableContent += '<tr><td>'+Info.id+'</td><td><a href="/themes/JustNews/admin/edit.html?id='+Info.id+'" target="_blank">'+Info.title+'</a></td><td>'+(Info.createDate ? Info.createDate.replace("T"," ") : '')+'</td></tr>';
 					})
 					$("#articleList tbody").append(tableContent);
 					$("#page").val(++page);
 				} else {
 					$("#loadmore").text("没有更多了").prop("disabled", true);
 				}
-			},
-			error: function() {
-				// Handle error, e.g. unauthorized
 			}
 		});
 	})
 
-	//新建/保存文章
 	function saveAddNew(){
 		if($('#title').val() == "" || $('#createDate').val() == "" || $('#category').val() == ""){
 			alert("标题、创建日期和分类为必填项！");
 			return;
 		}
-		var postURL = "/admin/saveEdit/";
-		if ($('#id').val() == "" || $('#id').val() == null)
-			postURL=  "/admin/saveAddNew/";
-
-		tinymce.triggerSave(); // 确保textarea内容同步
-		
+		var postURL = ($('#id').val()) ? "/admin/saveEdit/" : "/admin/saveAddNew/";
+		tinymce.triggerSave();
 		$.ajax({
-			type: "POST",
-			dataType: "json",
-			url: postURL,
+			type: "POST", dataType: "json", url: postURL,
 			contentType: "application/json; charset=utf-8",
 			data: JSON.stringify($("#addNewForm").serializeArray()),
 			success: function (result) {
-				if("msg" in result && result.msg === "OK"){
-					if ("id" in result){
-						$('#id').val(result.id);
-						$('#labelNew').text("编辑文章: "+result.id);
-					}
+				if(result && result.msg === "OK"){
+					if (result.id){ $('#id').val(result.id); $('#labelNew').text("编辑文章: "+result.id); }
 					alert("保存成功！");
-				}else {
-					alert("保存失败: " + result.msg);
-				}
+				} else { alert("保存失败: " + (result ? result.msg : '未知错误')); }
 			},
-			error: function() {
-				alert("请求失败，请检查网络或登录状态。");
-			}
+			error: function() { alert("请求失败，请检查网络或登录状态。"); }
 		});
 	}
 
-	// --- 分类动态管理JS ---
 	function renderCategories(categories) {
 		var list = $('#category-list');
 		list.empty();
 		if (categories && categories.length > 0) {
 			$.each(categories, function(index, category) {
-				var categoryHtml = `
-					<div class="form-group category-item">
-						<div class="input-group">
-							<span class="input-group-addon">名称</span>
-							<input type="text" class="form-control" value="${category.name || ''}" placeholder="分类名称 (必填)">
-							<span class="input-group-addon">图标</span>
-							<input type="text" class="form-control" value="${category.icon || ''}" placeholder="例: fas fa-home">
-							<div class="input-group-btn">
-								<button class="btn btn-danger" type="button" onclick="removeCategory(this)">
-									<i class="fas fa-trash"></i>
-								</button>
-							</div>
-						</div>
-					</div>
-				`;
+				var categoryHtml = `<div class="form-group category-item"><div class="input-group"><span class="input-group-addon">名称</span><input type="text" class="form-control" value="${category.name || ''}" placeholder="分类名称 (必填)"><span class="input-group-addon">图标</span><input type="text" class="form-control" value="${category.icon || ''}" placeholder="例: fas fa-home"><div class="input-group-btn"><button class="btn btn-danger" type="button" onclick="removeCategory(this)"><i class="fas fa-trash"></i></button></div></div></div>`;
 				list.append(categoryHtml);
 			});
 		}
@@ -426,21 +379,7 @@
 
 	function addCategory() {
 		var list = $('#category-list');
-		var categoryHtml = `
-			<div class="form-group category-item">
-				<div class="input-group">
-					<span class="input-group-addon">名称</span>
-					<input type="text" class="form-control" value="" placeholder="分类名称 (必填)">
-					<span class="input-group-addon">图标</span>
-					<input type="text" class="form-control" value="" placeholder="例: fas fa-home">
-					<div class="input-group-btn">
-						<button class="btn btn-danger" type="button" onclick="removeCategory(this)">
-							<i class="fas fa-trash"></i>
-						</button>
-					</div>
-				</div>
-			</div>
-		`;
+		var categoryHtml = `<div class="form-group category-item"><div class="input-group"><span class="input-group-addon">名称</span><input type="text" class="form-control" value="" placeholder="分类名称 (必填)"><span class="input-group-addon">图标</span><input type="text" class="form-control" value="" placeholder="例: fas fa-home"><div class="input-group-btn"><button class="btn btn-danger" type="button" onclick="removeCategory(this)"><i class="fas fa-trash"></i></button></div></div></div>`;
 		list.append(categoryHtml);
 	}
 
@@ -448,138 +387,90 @@
 		$(button).closest('.category-item').remove();
 	}
 	
-	// 保存设置
 	function saveConfig(){
 		var categories = [];
 		$('#category-list .category-item').each(function() {
 			var name = $(this).find('input').eq(0).val();
 			var icon = $(this).find('input').eq(1).val();
-			if (name) { 
-				categories.push({ name: name, icon: icon });
-			}
+			if (name) { categories.push({ name: name, icon: icon }); }
 		});
-		
 		var configData = [
 			{ name: 'WidgetCategory', value: JSON.stringify(categories) },
 			{ name: 'WidgetMenu', value: $('#WidgetMenu').val() },
 			{ name: 'WidgetLink', value: $('#WidgetLink').val() }
 		];
-		
-		if (!isJSON(configData[0].value) || !isJSON(configData[1].value) || !isJSON(configData[2].value)) {
-			alert("分类、菜单或链接的JSON格式错误！");
-			return false;
+		if (!isJSON(configData[1].value) || !isJSON(configData[2].value)) {
+			alert("菜单或链接的JSON格式错误！"); return false;
 		}
-
 		$.ajax({
-			type: "POST",
-			dataType: "json",
-			contentType: "application/json; charset=utf-8",
-			url: "/admin/saveConfig/",
-			data: JSON.stringify(configData),
+			type: "POST", dataType: "json", contentType: "application/json; charset=utf-8",
+			url: "/admin/saveConfig/", data: JSON.stringify(configData),
 			success: function (result) {
 				alert(result.msg);
-				updateCategoryDropdown(categories); // 保存成功后更新新建文章页的分类下拉框
+				updateCategoryDropdown(categories);
 			},
-			error: function() {
-				alert('保存失败，请检查网络或登录状态。');
-			}
+			error: function() { alert('保存失败，请检查网络或登录状态。'); }
 		});
 	}
 
-	//导入json
 	function importBlog(){
-		if(!isJSON($('#importJson').val())) {
-			alert("导入的JSON格式错误！");
-			return false;
-		}
-		if (confirm("确定要导入吗？这将覆盖您现有的所有文章和设置！")==false){
-            return false;
-        }
+		if(!isJSON($('#importJson').val())) { alert("导入的JSON格式错误！"); return; }
+		if (!confirm("确定要导入吗？这将覆盖您现有的所有文章和设置！")){ return; }
 		$.ajax({
-			type: "POST",
-			dataType: "json",
-			contentType: "application/json; charset=utf-8",
-			url: "/admin/import/" ,
-			data: JSON.stringify($("#importForm").serializeArray()),
+			type: "POST", dataType: "json", contentType: "application/json; charset=utf-8",
+			url: "/admin/import/", data: JSON.stringify($("#importForm").serializeArray()),
 			success: function (result) {
 				alert(result.msg);
-				if(result.msg === "OK") {
-					location.reload(); // 导入成功后刷新页面
-				}
+				if(result.msg === "OK") { location.reload(); }
 			},
-			error: function() {
-				alert("导入失败，请检查网络或登录状态。");
-			}
+			error: function() { alert("导入失败，请检查网络或登录状态。"); }
 		});
 	}
 
-	//发布
 	function publish(){
-		if (confirm("确定吗?发布将清理所有静态缓存,重新生成")==false){
-			return false;
-		}
+		if (!confirm("确定吗?发布将清理所有静态缓存,重新生成")){ return; }
 		$.ajax({
-			type: "POST",
-			dataType: "json",
-			contentType: "application/json; charset=utf-8",
-			url: "/admin/publish/" ,
-			success: function (result) {
-				alert(result.msg);
-			},
-			error: function() {
-				alert("发布失败，请检查网络或登录状态。");
-			}
+			type: "POST", dataType: "json", contentType: "application/json; charset=utf-8",
+			url: "/admin/publish/",
+			success: function (result) { alert(result.msg); },
+			error: function() { alert("发布失败，请检查网络或登录状态。"); }
 		});
 	}
 
 	function isJSON(str) {
-		if (typeof str == 'string' && str.trim() !== '') {
-			try {
-				var obj=JSON.parse(str);
-				return typeof obj == 'object' && obj;
-			} catch(e) {
-				return false;
-			}
-		} else if (typeof str == 'object' && str != null) {
-			return true;
-		}
-		return false;
+		try {
+			var obj = JSON.parse(str);
+			return typeof obj == 'object' && obj;
+		} catch (e) { return false; }
 	}
 
-    // --- 评论和轮播管理JS函数 ---
     function loadComments() {
-        $.ajax({ url: "/api/comments_all", type: 'GET', dataType: "json",
-            success: function(comments) {
-                var tbody = $('#comments-list');
-                tbody.empty();
-                $.each(comments, function(i, comment) {
-                    var row = '<tr id="comment-' + comment.id + '"><td>' + comment.articleSlug + '</td><td>' + comment.content + '</td><td>' + new Date(comment.timestamp).toLocaleString() + '</td><td><button class="btn btn-danger btn-sm" onclick="deleteComment(\'' + comment.articleSlug + '\', \'' + comment.id + '\')">删除</button></td></tr>';
-                    tbody.append(row);
-                });
-            }
-        });
+		$.getJSON("/api/comments_all", function(comments) {
+			var tbody = $('#comments-list').empty();
+			$.each(comments, function(i, comment) {
+				var row = `<tr id="comment-${comment.id}"><td>${comment.articleSlug}</td><td>${comment.content}</td><td>${new Date(comment.timestamp).toLocaleString()}</td><td><button class="btn btn-danger btn-sm" onclick="deleteComment('${comment.articleSlug}', '${comment.id}')">删除</button></td></tr>`;
+				tbody.append(row);
+			});
+		});
     }
 
     function deleteComment(articleSlug, commentId) {
         if (confirm('确定要删除这条评论吗？')) {
-            $.ajax({ url: '/api/comments/' + articleSlug + '/' + commentId, type: 'DELETE',
-                success: function() { $('#comment-' + commentId).remove(); },
+            $.ajax({ url: `/api/comments/${articleSlug}/${commentId}`, type: 'DELETE',
+                success: function() { $(`#comment-${commentId}`).remove(); },
                 error: function() { alert('删除失败'); }
             });
         }
     }
 
     function loadCarousel() {
-        $.ajax({ url: "/api/carousel", type: 'GET', dataType: "json",
-            success: function(slides) {
-                var tbody = $('#carousel-list');
-                tbody.empty();
-                $.each(slides, function(i, slide) {
-                    var row = '<tr id="slide-' + slide.id + '"><td><img src="' + slide.imageUrl + '" alt="预览" style="max-width: 150px; height: auto;"></td><td>' + slide.imageUrl + '</td><td>' + slide.linkUrl + '</td><td><button class="btn btn-danger btn-sm" onclick="deleteCarousel(\'' + slide.id + '\')">删除</button></td></tr>';
-                    tbody.append(row);
-                });
-            }
-        });
+		$.getJSON("/api/carousel", function(slides) {
+			var tbody = $('#carousel-list').empty();
+			$.each(slides, function(i, slide) {
+				var row = `<tr id="slide-${slide.id}"><td><img src="${slide.imageUrl}" alt="预览" style="max-width: 150px; height: auto;"></td><td>${slide.imageUrl}</td><td>${slide.linkUrl}</td><td><button class="btn btn-danger btn-sm" onclick="deleteCarousel('${slide.id}')">删除</button></td></tr>`;
+				tbody.append(row);
+			});
+		});
     }
 
     function addCarousel() {
@@ -587,12 +478,11 @@
         var linkUrl = $('#linkUrl').val();
         if (!imageUrl || !linkUrl) { alert('图片URL和链接URL均不能为空！'); return; }
         $.ajax({
-            url: "/api/carousel", type: 'POST', contentType: "application/json; charset=utf-8",
+            url: "/api/carousel", type: 'POST', contentType: "application/json",
             data: JSON.stringify({ imageUrl: imageUrl, linkUrl: linkUrl }),
             success: function() {
                 loadCarousel();
-                $('#imageUrl').val('');
-                $('#linkUrl').val('');
+                $('#imageUrl').val(''); $('#linkUrl').val('');
             },
             error: function() { alert('添加失败'); }
         });
@@ -600,20 +490,16 @@
 
     function deleteCarousel(slideId) {
         if (confirm('确定要删除这张轮播图吗？')) {
-            $.ajax({ url: '/api/carousel/' + slideId, type: 'DELETE',
-                success: function() { $('#slide-' + slideId).remove(); },
+            $.ajax({ url: `/api/carousel/${slideId}`, type: 'DELETE',
+                success: function() { $(`#slide-${slideId}`).remove(); },
                 error: function() { alert('删除失败'); }
             });
         }
     }
     
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-      if(e.target.hash == "#comments-manager"){
-        loadComments();
-      }
-      if(e.target.hash == "#carousel-manager"){
-        loadCarousel();
-      }
+      if(e.target.hash == "#comments-manager"){ loadComments(); }
+      if(e.target.hash == "#carousel-manager"){ loadCarousel(); }
     });
 </script>
 
