@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>{{ OPT.title }}</title>
+    <title>{{ articleSingle.title }} - {{ OPT.siteName }}</title>
     <meta name="description" content="{{ OPT.siteDescription }}">
-    <meta name="keywords" content="{{ OPT.keyWords }}">
-    <link rel="canonical" href="{{ OPT.siteUrl }}">
+    <meta name="keywords" content="{{ articleSingle.tags }}">
+    <link rel="canonical" href="{{ OPT.siteUrl }}{{ articleSingle.url }}">
     {{{ OPT.codeBeforHead }}}
     <link rel='stylesheet' id='font-awesome-css' href='{{ &OPT.theme_github_path }}JustNews/files/font-awesome.css' type='text/css' media='all' />
     <link rel='stylesheet' id='style-css' href='{{ &OPT.theme_github_path }}JustNews/files/style.min.css' type='text/css' media='all' />
@@ -23,7 +23,28 @@
 <body class="post-template-default single single-post single-format-standard">
     <div id="page" class="site">
         <header id="masthead" class="site-header">
-            </header>
+            <div class="header-main">
+                <div class="container">
+                    <div class="row">
+                        <div class="site-branding col-md-3">
+                            <h1 class="site-title">
+                                <a href="/" title="{{ OPT.siteName }}" rel="home">
+                                    <img src="{{ OPT.logo }}" alt="{{ OPT.siteName }}">
+                                </a>
+                            </h1>
+                        </div>
+                        <div id="main-navigation" class="main-navigation col-md-9">
+                            <ul id="menu-primary-items" class="menu">
+                                {{#widgetMenuList}}
+                                <li><a href="{{ url }}">{{ title }}</a></li>
+                                {{/widgetMenuList}}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
         <div id="content" class="site-content">
             <div class="container">
                 <div class="row">
@@ -36,7 +57,7 @@
                                     <div class="entry-meta">
                                         <span class="posted-on">
                                             <i class="fas fa-calendar-alt"></i>
-                                            <time class="entry-date published">{{ createDate10 }}</time>
+                                            <time class="entry-date published">{{ createDate }}</time>
                                         </span>
                                         <span class="cat-links">
                                             <i class="fas fa-folder-open"></i>
@@ -62,7 +83,25 @@
                             </article>
                             {{/articleSingle}}
 
-                            <div id="comments" class="comments-area">
+                            <nav class="navigation post-navigation" role="navigation">
+                                <h2 class="screen-reader-text">文章导航</h2>
+                                <div class="nav-links">
+                                    {{#articleNewer}}
+                                    <div class="nav-previous">
+                                        <a href="{{ url }}" rel="prev"><span class="meta-nav" aria-hidden="true">上一篇</span>
+                                            <span class="post-title">{{ title }}</span></a>
+                                    </div>
+                                    {{/articleNewer}}
+                                    {{#articleOlder}}
+                                    <div class="nav-next">
+                                        <a href="{{ url }}" rel="next"><span class="meta-nav" aria-hidden="true">下一篇</span>
+                                            <span class="post-title">{{ title }}</span></a>
+                                    </div>
+                                    {{/articleOlder}}
+                                </div>
+                            </nav>
+
+                             <div id="comments" class="comments-area">
                                 <h2 class="comments-title">发表评论</h2>
                                 <div id="respond" class="comment-respond">
                                     <form id="commentform" class="comment-form">
@@ -79,24 +118,68 @@
                         </main>
                     </div>
                     <div id="secondary" class="widget-area col-md-4" role="complementary">
-                        </div>
+						<aside id="categories-2" class="widget widget_categories">
+							<h3 class="widget-title"><span>分类</span></h3>
+							<ul>
+								{{#widgetCategoryList}}
+								<li class="cat-item">
+									<a href="/category/{{name}}/"><i class="{{icon}} fa-fw"></i> {{name}}</a>
+								</li>
+								{{/widgetCategoryList}}
+							</ul>
+						</aside>
+						<aside id="recent-posts-2" class="widget widget_recent_entries">
+							<h3 class="widget-title"><span>近期文章</span></h3>
+							<ul>
+								{{#widgetRecentlyList}}
+								<li>
+									<a href="{{url}}">{{title}}</a>
+								</li>
+								{{/widgetRecentlyList}}
+							</ul>
+						</aside>
+                         <aside id="custom_html-2" class="widget_text widget widget_custom_html">
+                            <h3 class="widget-title"><span>标签</span></h3>
+                            <div class="textwidget custom-html-widget">
+                                <div class="tagcloud">
+                                    {{#widgetTagList}}
+                                    <a href="/tags/{{.}}/" class="tag-cloud-link">{{.}}</a>
+                                    {{/widgetTagList}}
+                                </div>
+                            </div>
+                        </aside>
+                        <aside id="linkcat-2" class="widget widget_links">
+                            <h3 class="widget-title"><span>链接</span></h3>
+                            <ul class='xoxo blogroll'>
+                                {{#widgetLinkList}}
+                                <li><a href="{{url}}" target="_blank">{{title}}</a></li>
+                                {{/widgetLinkList}}
+                            </ul>
+                        </aside>
+					</div>
                 </div>
             </div>
         </div>
         <footer id="colophon" class="site-footer">
-            </footer>
+            <div class="container">
+                <div class="site-info">
+                    {{ OPT.copyRight }} {{ OPT.siteName }}
+                </div>
+            </div>
+        </footer>
     </div>
     {{{ OPT.codeBeforBody }}}
     <script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/jquery.min.js'></script>
     <script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/main.js'></script>
     <script>
-        // Comments submission logic
         $(document).ready(function() {
-            const articleId = "{{articleSingle.id}}"; // Get article ID from template
+            const articleId = "{{articleSingle.id}}"; 
+            const articleLink = "{{articleSingle.link}}";
+            const articleSlug = `${articleId}/${articleLink}`;
 
             function loadComments() {
-                if (!articleId) return;
-                $.getJSON(`/api/comments/${articleId}`, function(comments) {
+                if (!articleSlug) return;
+                $.getJSON(`/api/comments/${articleSlug}`, function(comments) {
                     const commentList = $('.comment-list').empty();
                     if (comments && comments.length > 0) {
                         comments.forEach(function(comment) {
@@ -115,7 +198,7 @@
                 }
 
                 $.ajax({
-                    url: `/api/comments/${articleId}`,
+                    url: `/api/comments/${articleSlug}`,
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({ content: commentContent }),
