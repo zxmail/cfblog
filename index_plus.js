@@ -52,7 +52,9 @@ async function handleRequest({ request, env, ctx }) {
 			return await renderHTML(request, await getIndexData(request, env), theme + "/index.html", 200, env, ctx);
 		}
 		else if (pathname.startsWith("/article/")) {
-			let id = pathname.substring(9, pathname.lastIndexOf('/'));
+            // ROBUST ID PARSING
+			const parts = pathname.split('/');
+            const id = parts[2];
 			return await renderHTML(request, await getArticleData(request, id, env), theme + "/article.html", 200, env, ctx);
 		}
 		else if (pathname.startsWith("/category/")) {
@@ -345,7 +347,7 @@ async function getIndexData(request, env) {
 	if (page > 1) data["pageNewer"] = { "url": `/page/${page - 1}/`};
 	if (articleList.length > page * pageSize) data["pageOlder"] = { "url": `/page/${page + 1}/`};
 	data["widgetCategoryList"] = JSON.parse(await env.CONFIG.get("WidgetCategory") || "[]");
-	data["widgetMenuList"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
+	data["nav"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
 	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink") || "[]");
 	let widgetRecentlyList = articleList.slice(0, 5);
 	for (const item of widgetRecentlyList) {
@@ -362,7 +364,7 @@ async function getArticleData(request, id, env) {
 	if (!articleSingle) return new Response("Article not found", { status: 404 });
 	
 	articleSingle.url = `/article/${articleSingle.id}/${articleSingle.link}/`;
-	articleSingle.contentHtml = await aesDecrypt(articleSingle.contentHtml, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
+	articleSingle.content = await aesDecrypt(articleSingle.contentHtml, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
 
     const allCategoriesText = await env.CONFIG.get("WidgetCategory") || "[]";
     const allCategories = JSON.parse(allCategoriesText);
@@ -383,7 +385,7 @@ async function getArticleData(request, id, env) {
 	}
 
 	data["widgetCategoryList"] = allCategories;
-	data["widgetMenuList"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
+	data["nav"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
 	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink") || "[]");
 	let widgetRecentlyList = articleList.slice(0, 5);
 	for (const item of widgetRecentlyList) {
@@ -421,7 +423,7 @@ async function getCategoryOrTagsData(request, type, key, page, env) {
 	if (result.length > page * pageSize) data["pageOlder"] = { "url": `/${type}/${key}/page/${page + 1}/`};
 
 	data["widgetCategoryList"] = JSON.parse(await env.CONFIG.get("WidgetCategory") || "[]");
-	data["widgetMenuList"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
+	data["nav"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
 	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink") || "[]");
 	let widgetRecentlyList = articleList.slice(0, 5);
 	for (const item of widgetRecentlyList) {
