@@ -49,31 +49,31 @@
 				<div class="collapse navbar-collapse">
 					<nav class="navbar-left primary-menu">
 						<ul id="menu-%e5%af%bc%e8%88%aa" class="nav navbar-nav wpcom-adv-menu">
-							{{#each widgetMenuList}}
-							<li class="menu-item {{#if children}}menu-item-has-children{{/if}}">
-								<a href="{{url}}">
-									{{#if icon}}<i class="{{icon}}"></i> {{/if}}{{title}}
+							{{ #widgetMenuList }}
+							<li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
+								<a href="{{ &url }}">
+									{{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
 								</a>
-								{{#if children}}
+								{{ #children }}
 								<ul class="sub-menu">
-									{{#each children}}
-									<li class="menu-item {{#if children}}menu-item-has-children{{/if}}">
-										<a href="{{url}}">
-											{{#if icon}}<i class="{{icon}}"></i> {{/if}}{{title}}
+									{{ #. }}
+									<li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
+										<a href="{{ &url }}">
+											{{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
 										</a>
-										{{#if children}}
+										{{ #children }}
 										<ul class="sub-menu">
-											{{#each children}}
-											<li class="menu-item"><a href="{{url}}">{{#if icon}}<i class="{{icon}}"></i> {{/if}}{{title}}</a></li>
-											{{/each}}
+											{{ #. }}
+											<li class="menu-item"><a href="{{ &url }}">{{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}</a></li>
+											{{ /. }}
 										</ul>
-										{{/if}}
+										{{ /children }}
 									</li>
-									{{/each}}
+									{{ /. }}
 								</ul>
-								{{/if}}
+								{{ /children }}
 							</li>
-							{{/each}}
+							{{ /widgetMenuList }}
 						</ul>
 						</nav>
 					<div class="navbar-action pull-right">
