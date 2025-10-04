@@ -149,9 +149,23 @@
 							</div>
 						</div>
 
-						<div class="form-group">
-							<label for="name">菜单, 例:<code>[{"title":"技术文章","url":"/category/技术文章"}]</code></label>
-							<textarea class="form-control" id="WidgetMenu" name="WidgetMenu" rows="5"></textarea>
+						<div class="panel panel-default">
+							<div class="panel-heading">菜单设置</div>
+							<div class="panel-body">
+								<p class="help-block">
+									<b>使用说明:</b><br>
+									- 点击下方的“+ 添加菜单”按钮来创建新的一级菜单。<br>
+									- 每个菜单项都可以填写“菜单名”、“链接”和“图标”。图标为 FontAwesome 5 Pro 图标代码, 例如: <code>fas fa-home</code>。<br>
+									- 点击菜单项右侧的 <button class="btn btn-info btn-xs" disabled><i class="fas fa-plus"></i></button> 按钮可以为其添加子菜单（最多支持三级）。<br>
+									- 点击菜单项右侧的 <button class="btn btn-danger btn-xs" disabled><i class="fas fa-trash"></i></button> 按钮可以删除该菜单及其所有子菜单。<br>
+									- 拖动菜单项可以对其进行排序（此功能尚未实现）。
+								</p>
+								<div id="menu-list">
+								</div>
+								<button type="button" class="btn btn-success btn-sm" onclick="addMenuItem(1, '#menu-list')">
+									<i class="fas fa-plus"></i> 添加菜单
+								</button>
+							</div>
 						</div>
 
 						<div class="form-group">
@@ -305,7 +319,7 @@
 			var initialLink = {{& widgetLinkList }};
 
 			renderCategories(initialCategories);
-			$('#WidgetMenu').val(JSON.stringify(initialMenu, null, 2));
+			renderMenu(initialMenu, $('#menu-list')); // Updated this line
 			$('#WidgetLink').val(JSON.stringify(initialLink, null, 2));
 			
 			updateCategoryDropdown(initialCategories);
@@ -445,8 +459,6 @@
 				if(result && result.msg === "OK"){
 					if (result.id){ $('#id').val(result.id); $('#labelNew').text("编辑文章: "+result.id); }
 					alert("保存成功！");
-					// Optional: switch back to the list view
-					// $('a[data-toggle="tab"][href="#list"]').tab('show');
 				} else { alert("保存失败: " + (result ? result.msg : '未知错误')); }
 			},
 			error: function() { alert("请求失败，请检查网络或登录状态。"); }
@@ -474,21 +486,108 @@
 		$(button).closest('.category-item').remove();
 	}
 	
+	// New Menu Functions
+	function renderMenu(menus, container) {
+		var containerEl = $(container);
+		containerEl.empty();
+		if (menus && menus.length > 0) {
+			$.each(menus, function(index, menu) {
+				var currentLevel = (containerEl.parents('.menu-item').length) + 1;
+				var addSubMenuButton = currentLevel < 3 ? `<button class="btn btn-info btn-sm" type="button" onclick="addMenuItem(${currentLevel + 1}, this)"><i class="fas fa-plus"></i></button>` : '';
+				var menuHtml = `
+					<div class="form-group menu-item" data-level="${currentLevel}">
+						<div class="input-group">
+							<span class="input-group-addon">名称</span><input type="text" class="form-control" value="${menu.title || ''}" placeholder="菜单名称">
+							<span class="input-group-addon">链接</span><input type="text" class="form-control" value="${menu.url || ''}" placeholder="URL链接">
+							<span class="input-group-addon">图标</span><input type="text" class="form-control" value="${menu.icon || ''}" placeholder="例: fas fa-home">
+							<div class="input-group-btn">
+								${addSubMenuButton}
+								<button class="btn btn-danger btn-sm" type="button" onclick="removeMenuItem(this)"><i class="fas fa-trash"></i></button>
+							</div>
+						</div>
+						<div class="sub-menu-container" style="margin-left: 25px;"></div>
+					</div>`;
+				containerEl.append(menuHtml);
+
+				if (menu.children && menu.children.length > 0) {
+					var newContainer = containerEl.children('.menu-item').last().find('.sub-menu-container');
+					renderMenu(menu.children, newContainer);
+				}
+			});
+		}
+	}
+
+	function addMenuItem(level, element) {
+		var addSubMenuButton = level < 3 ? `<button class="btn btn-info btn-sm" type="button" onclick="addMenuItem(${level + 1}, this)"><i class="fas fa-plus"></i></button>` : '';
+		var menuHtml = `
+			<div class="form-group menu-item" data-level="${level}">
+				<div class="input-group">
+					<span class="input-group-addon">名称</span><input type="text" class="form-control" value="" placeholder="菜单名称">
+					<span class="input-group-addon">链接</span><input type="text" class="form-control" value="" placeholder="URL链接">
+					<span class="input-group-addon">图标</span><input type="text" class="form-control" value="" placeholder="例: fas fa-home">
+					<div class="input-group-btn">
+						${addSubMenuButton}
+						<button class="btn btn-danger btn-sm" type="button" onclick="removeMenuItem(this)"><i class="fas fa-trash"></i></button>
+					</div>
+				</div>
+				<div class="sub-menu-container" style="margin-left: 25px;"></div>
+			</div>`;
+
+		if (level === 1) {
+			$(element).append(menuHtml);
+		} else {
+			$(element).closest('.menu-item').children('.sub-menu-container').append(menuHtml);
+		}
+	}
+
+	function removeMenuItem(button) {
+		$(button).closest('.menu-item').remove();
+	}
+
+	function getMenuItemsFromDom(container) {
+		var menus = [];
+		$(container).children('.menu-item').each(function() {
+			var title = $(this).find('input').eq(0).val();
+			if (title) {
+				var menu = {
+					title: title,
+					url: $(this).find('input').eq(1).val(),
+					icon: $(this).find('input').eq(2).val()
+				};
+				var subContainer = $(this).children('.sub-menu-container');
+				if (subContainer.children('.menu-item').length > 0) {
+					menu.children = getMenuItemsFromDom(subContainer);
+				}
+				menus.push(menu);
+			}
+		});
+		return menus;
+	}
+
+
 	function saveConfig(){
+		// Save Categories
 		var categories = [];
 		$('#category-list .category-item').each(function() {
 			var name = $(this).find('input').eq(0).val();
 			var icon = $(this).find('input').eq(1).val();
 			if (name) { categories.push({ name: name, icon: icon }); }
 		});
+
+		// Save Menus
+		var menus = getMenuItemsFromDom($('#menu-list'));
+
+		// Prepare data
 		var configData = [
 			{ name: 'WidgetCategory', value: JSON.stringify(categories) },
-			{ name: 'WidgetMenu', value: $('#WidgetMenu').val() },
+			{ name: 'WidgetMenu', value: JSON.stringify(menus) },
 			{ name: 'WidgetLink', value: $('#WidgetLink').val() }
 		];
-		if (!isJSON(configData[1].value) || !isJSON(configData[2].value)) {
-			alert("菜单或链接的JSON格式错误！"); return false;
+		
+		if (!isJSON(configData[2].value)) {
+			alert("“其他链接”的JSON格式错误！"); return false;
 		}
+
 		$.ajax({
 			type: "POST", dataType: "json", contentType: "application/json; charset=utf-8",
 			url: "/admin/saveConfig/", data: JSON.stringify(configData),
@@ -525,6 +624,7 @@
 	}
 
 	function isJSON(str) {
+		if (typeof str !== 'string') return false;
 		try {
 			var obj = JSON.parse(str);
 			return typeof obj == 'object' && obj;
