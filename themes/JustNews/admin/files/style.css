@@ -89,39 +89,3 @@ body {
     min-width: 50px;
     text-align: center;
 }
-
-
-body {
-    padding-bottom: 20px;
-}
-
-/* Styles for the new menu editor */
-.menu-editor .list-group-item {
-    margin-top: 10px;
-    border: 1px solid rgba(0,0,0,.125); /* Add border for better visibility */
-    padding: 15px;
-}
-.menu-item-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.menu-editor .handle {
-    cursor: grab;
-    font-size: 1.2em;
-    color: #ccc;
-    margin-right: 5px;
-}
-.sub-menu-list {
-    margin-top: 15px;
-    margin-left: 40px;
-    border-left: 2px solid #f0f0f0;
-    padding-left: 15px;
-    list-style: none; /* Remove default list bullets */
-}
-
-/* Ensure sub-menu items also have a border */
-.sub-menu-list .list-group-item {
-    padding: 10px;
-}
-
