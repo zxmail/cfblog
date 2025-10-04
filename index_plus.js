@@ -104,6 +104,8 @@ async function handleRequest({ request, env, ctx }) {
 					jsonA.forEach(function (item) { article[item.name] = item.value; });
 					let id = Date.now().toString();
 					article.id = id;
+                    article.contentHtml = await aesEncrypt(article.content, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
+                    delete article.content;
 					let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
 					articleList.unshift(article);
 					await env.BLOG.put("articleList", JSON.stringify(articleList));
@@ -113,6 +115,8 @@ async function handleRequest({ request, env, ctx }) {
 					let jsonA = await request.json();
 					let article = {};
 					jsonA.forEach(function (item) { article[item.name] = item.value; });
+                    article.contentHtml = await aesEncrypt(article.content, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
+                    delete article.content;
 					let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
 					let id = article.id;
 					const index = articleList.findIndex(item => item.id === id)
@@ -122,7 +126,6 @@ async function handleRequest({ request, env, ctx }) {
 					await env.BLOG.put("articleList", JSON.stringify(articleList));
 					return new Response(JSON.stringify({ "id": id, "msg": "OK" }), { status: 200, headers: { 'Content-Type': 'application/json' }});
 				}
-				// [CRITICAL FIX] Robust article fetching for the admin panel
 				else if (pathname.startsWith("/admin/get/")) {
 					const parts = pathname.split('/');
 					const id = parts[3]; 
@@ -135,6 +138,8 @@ async function handleRequest({ request, env, ctx }) {
 					const articleSingle = articleList.find(item => item.id === id);
 				
 					if (articleSingle) {
+                        articleSingle.content = await aesDecrypt(articleSingle.contentHtml, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
+                        delete articleSingle.contentHtml;
 						return new Response(JSON.stringify(articleSingle), { status: 200, headers: { 'Content-Type': 'application/json' }});
 					} else {
 						return new Response(JSON.stringify({ msg: `Article with ID ${id} not found.` }), { status: 404, headers: { 'Content-Type': 'application/json' }});
@@ -204,6 +209,15 @@ async function handleRequest({ request, env, ctx }) {
 			}
 			xml += `</urlset>`;
 			return new Response(xml, { status: 200, headers: { 'Content-Type': 'application/xml;charset=UTF-8' }});
+		}
+		else if (pathname.startsWith('/api/comments/') && request.method === 'POST') {
+			const articleSlug = pathname.split('/')[3];
+			let newComment = await request.json();
+			const comments = await env.COMMENTS_KV.get(articleSlug, { type: 'json' }) || [];
+			newComment.id = crypto.randomUUID();
+			comments.push(newComment);
+			await env.COMMENTS_KV.put(articleSlug, JSON.stringify(comments));
+			return new Response(JSON.stringify(newComment), { status: 201, headers: { 'Content-Type': 'application/json' } });
 		}
 		else if (pathname.startsWith('/api/comments/') && request.method === 'DELETE') {
 			const [_a, _b, _c, articleSlug, commentId] = pathname.split('/');
@@ -291,6 +305,26 @@ async function render(data, template_path, env) {
 	return Mustache.render(template, renderData);
 }
 
+async function aesEncrypt(data, key, iv) {
+	const encodedData = new TextEncoder().encode(data);
+	const encodedKey = new TextEncoder().encode(key);
+	const encodedIv = new TextEncoder().encode(iv);
+	const cryptoKey = await crypto.subtle.importKey('raw', encodedKey, { name: 'AES-CBC' }, false, ['encrypt']);
+	const encrypted = await crypto.subtle.encrypt({ name: 'AES-CBC', iv: encodedIv }, cryptoKey, encodedData);
+	const buffer = new Uint8Array(encrypted);
+	return btoa(String.fromCharCode.apply(null, buffer));
+}
+
+async function aesDecrypt(data, key, iv) {
+    if (!data) return "";
+	const buffer = Uint8Array.from(atob(data), c => c.charCodeAt(0));
+	const encodedKey = new TextEncoder().encode(key);
+	const encodedIv = new TextEncoder().encode(iv);
+	const cryptoKey = await crypto.subtle.importKey('raw', encodedKey, { name: 'AES-CBC' }, false, ['decrypt']);
+	const decrypted = await crypto.subtle.decrypt({ name: 'AES-CBC', iv: encodedIv }, cryptoKey, buffer);
+	return new TextDecoder().decode(decrypted);
+}
+
 async function getIndexData(request, env) {
 	let url = new URL(request.url);
 	let page = 1;
@@ -303,7 +337,8 @@ async function getIndexData(request, env) {
 	for (const item of result) {
 		item.url = `/article/${item.id}/${item.link}/`;
 		item.createDate10 = item.createDate.substring(0, 10);
-		item.contentText = (item.content || "").replace(/<[^>]+>/g, "").substring(0, 100);
+        const decryptedContent = await aesDecrypt(item.contentHtml, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
+		item.contentText = decryptedContent.replace(/<[^>]+>/g, "").substring(0, 100);
 	}
 	let data = {};
 	data["articleList"] = result;
@@ -327,7 +362,7 @@ async function getArticleData(request, id, env) {
 	if (!articleSingle) return new Response("Article not found", { status: 404 });
 	
 	articleSingle.url = `/article/${articleSingle.id}/${articleSingle.link}/`;
-	articleSingle.contentHtml = articleSingle.content;
+	articleSingle.contentHtml = await aesDecrypt(articleSingle.contentHtml, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
 
     const allCategoriesText = await env.CONFIG.get("WidgetCategory") || "[]";
     const allCategories = JSON.parse(allCategoriesText);
@@ -377,7 +412,8 @@ async function getCategoryOrTagsData(request, type, key, page, env) {
 	let resultPage = result.slice((page - 1) * pageSize, page * pageSize);
 	for (const item of resultPage) {
 		item.url = `/article/${item.id}/${item.link}/`;
-		item.contentText = (item.content || "").replace(/<[^>]+>/g, "").substring(0, 100);
+        const decryptedContent = await aesDecrypt(item.contentHtml, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
+		item.contentText = decryptedContent.replace(/<[^>]+>/g, "").substring(0, 100);
 	}
 	let data = {};
 	data["articleList"] = resultPage;
