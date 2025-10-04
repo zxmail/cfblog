@@ -299,7 +299,6 @@
 
 			$('#createDate').val(new Date().toISOString().slice(0, 16));
 			
-			// [FIXED] Correctly parse the raw JSON string passed from the backend
 			var initialCategories = {{& widgetCategoryList }};
 			var initialMenu = {{& widgetMenuList }};
 			var initialLink = {{& widgetLinkList }};
