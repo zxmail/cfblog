@@ -50,7 +50,29 @@
 					<nav class="navbar-left primary-menu">
 						<ul id="menu-%e5%af%bc%e8%88%aa" class="nav navbar-nav wpcom-adv-menu">
 							{{ #widgetMenuList }}
-								<li class="menu-item"><a href="{{ &url }}">{{ &title }}</a></li>
+							<li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
+								<a href="{{ &url }}">
+									{{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
+								</a>
+								{{ #children }}
+								<ul class="sub-menu">
+									{{ #. }}
+									<li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
+										<a href="{{ &url }}">
+											{{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
+										</a>
+										{{ #children }}
+										<ul class="sub-menu">
+											{{ #. }}
+											<li class="menu-item"><a href="{{ &url }}">{{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}</a></li>
+											{{ /. }}
+										</ul>
+										{{ /children }}
+									</li>
+									{{ /. }}
+								</ul>
+								{{ /children }}
+							</li>
 							{{ /widgetMenuList }}
 						</ul>
 						</nav>
@@ -161,7 +183,7 @@
 							<li class="cat-item cat-item-5 current-cat">
 								<a aria-current="page" href="/category/{{&name}}">{{&name}}</a></li>
 							{{ /widgetCategoryList }}
-						</ul>
+							</ul>
 					</div>
 					<div id="tag_cloud-3" class="widget widget_tag_cloud">
 						<h3 class="widget-title">
