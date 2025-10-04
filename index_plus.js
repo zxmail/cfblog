@@ -77,21 +77,18 @@ async function handleRequest({ request, env, ctx }) {
 			if (pathname === "/admin" || pathname === "/admin/" || pathname.endsWith("/admin/index.html")) {
 				let data = {};
 				
-				// [CRITICAL FIX] Check for old category format and convert it for backward compatibility.
 				let rawCategories = await env.CONFIG.get("WidgetCategory");
 				let categories = [];
 				if (rawCategories) {
 					try {
 						let parsedCategories = JSON.parse(rawCategories);
 						if (Array.isArray(parsedCategories) && parsedCategories.length > 0 && typeof parsedCategories[0] === 'string') {
-							// Old format detected: ["catA", "catB"]. Convert it.
 							categories = parsedCategories.map(name => ({ name: name, icon: '' }));
 						} else {
-							// Already in new format: [{"name":"catA", "icon":""}] or empty array.
 							categories = parsedCategories;
 						}
 					} catch (e) {
-						categories = []; // In case of parsing error, default to empty.
+						categories = [];
 					}
 				}
 
@@ -101,7 +98,6 @@ async function handleRequest({ request, env, ctx }) {
 				return await renderHTML(request, data, theme + "/admin/index.html", 200, env, ctx);
 			}
 			else if (checkPass(request)) {
-				//
 				if (pathname.startsWith("/admin/saveAddNew/")) {
 					let jsonA = await request.json();
 					let article = {};
@@ -126,11 +122,23 @@ async function handleRequest({ request, env, ctx }) {
 					await env.BLOG.put("articleList", JSON.stringify(articleList));
 					return new Response(JSON.stringify({ "id": id, "msg": "OK" }), { status: 200, headers: { 'Content-Type': 'application/json' }});
 				}
+				// [CRITICAL FIX] Robust article fetching for the admin panel
 				else if (pathname.startsWith("/admin/get/")) {
-					let id = pathname.substring(12);
-					let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
-					let articleSingle = articleList.find(item => item.id === id);
-					return new Response(JSON.stringify(articleSingle), { status: 200, headers: { 'Content-Type': 'application/json' }});
+					const parts = pathname.split('/');
+					const id = parts[3]; 
+
+					if (!id) {
+						return new Response(JSON.stringify({ msg: "Article ID is missing." }), { status: 400, headers: { 'Content-Type': 'application/json' }});
+					}
+				
+					const articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
+					const articleSingle = articleList.find(item => item.id === id);
+				
+					if (articleSingle) {
+						return new Response(JSON.stringify(articleSingle), { status: 200, headers: { 'Content-Type': 'application/json' }});
+					} else {
+						return new Response(JSON.stringify({ msg: `Article with ID ${id} not found.` }), { status: 404, headers: { 'Content-Type': 'application/json' }});
+					}
 				}
 				else if (pathname.startsWith("/admin/getList/")) {
 					let page = pathname.substring(15, pathname.lastIndexOf('/'));
@@ -140,7 +148,8 @@ async function handleRequest({ request, env, ctx }) {
 					return new Response(JSON.stringify(result), { status: 200, headers: { 'Content-Type': 'application/json' }});
 				}
 				else if (pathname.startsWith("/admin/delete/")) {
-					let id = pathname.substring(14);
+					const parts = pathname.split('/');
+    				const id = parts[3];
 					let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
 					const index = articleList.findIndex(item => item.id === id);
 					if (index > -1) {
@@ -318,6 +327,16 @@ async function getArticleData(request, id, env) {
 	if (!articleSingle) return new Response("Article not found", { status: 404 });
 	
 	articleSingle.url = `/article/${articleSingle.id}/${articleSingle.link}/`;
+	articleSingle.contentHtml = articleSingle.content;
+
+    const allCategoriesText = await env.CONFIG.get("WidgetCategory") || "[]";
+    const allCategories = JSON.parse(allCategoriesText);
+    const articleCategories = (articleSingle['category[]'] || []).map(catName => {
+        const foundCat = allCategories.find(c => c.name === catName);
+        return foundCat || { name: catName, icon: '' }; 
+    });
+    articleSingle.categories = articleCategories;
+
 	data["articleSingle"] = articleSingle;
 	
 	const index = articleList.findIndex(item => item.id === id)
@@ -328,7 +347,7 @@ async function getArticleData(request, id, env) {
 		data["articleOlder"] = { ...articleList[index + 1], url: `/article/${articleList[index + 1].id}/${articleList[index + 1].link}/` };
 	}
 
-	data["widgetCategoryList"] = JSON.parse(await env.CONFIG.get("WidgetCategory") || "[]");
+	data["widgetCategoryList"] = allCategories;
 	data["widgetMenuList"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
 	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink") || "[]");
 	let widgetRecentlyList = articleList.slice(0, 5);
