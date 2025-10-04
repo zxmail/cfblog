@@ -51,8 +51,8 @@
 			<a href="/" >CF-blog</a>
 		</div>
 		<ul class="nav nav-pills nav-stacked">
-			<li><a data-toggle="tab" href="#list"><i class="fas fa-fw fa-list-alt"></i> 我的文章</a></li>
-			<li class="active"><a data-toggle="tab" href="#new"><i class="fas fa-fw fa-plus"></i> 新建文章</a></li>
+			<li class="active"><a data-toggle="tab" href="#list"><i class="fas fa-fw fa-list-alt"></i> 我的文章</a></li>
+			<li><a data-toggle="tab" href="#new"><i class="fas fa-fw fa-plus"></i> 新建/编辑</a></li>
 			<li><a data-toggle="tab" href="#config"><i class="fas fa-fw fa-cog"></i> 网站设置</a></li>
 			<li><a data-toggle="tab" href="#comments-manager"><i class="fas fa-fw fa-comments"></i> 评论管理</a></li>
 			<li><a data-toggle="tab" href="#carousel-manager"><i class="fas fa-fw fa-images"></i> 轮播管理</a></li>
@@ -63,7 +63,7 @@
 
 	<div class="admin-content">
 		<div class="tab-content">
-			<div class="tab-pane fade" id="list">
+			<div class="tab-pane fade in active" id="list">
 				<div class="container-fluid">
 					<h3>我的文章</h3>
 					<table class="table table-striped" id="articleList">
@@ -72,6 +72,7 @@
 								<th>ID</th>
 								<th>标题</th>
 								<th>创建日期</th>
+								<th>操作</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -82,7 +83,7 @@
 				</div>
 			</div>
 
-			<div class="tab-pane fade in active" id="new">
+			<div class="tab-pane fade" id="new">
 				<div class="container-fluid">
 					<h3 id="labelNew">新增文章 <span style="color: red;">*</span></h3>
 					<form id="addNewForm" class="form-inline" >
@@ -321,7 +322,25 @@
 			}
 			category_select.selectpicker('refresh');
 		}
+
+		// When "New/Edit" tab is clicked, reset the form.
+        $('a[data-toggle="tab"][href="#new"]').on('click', function(e) {
+            if (!$(e.target).closest('.admin-sidebar').length || !$('#new').hasClass('active')) {
+                 resetForm();
+            }
+        });
 	});
+
+	function resetForm() {
+		$('#addNewForm')[0].reset();
+		$('#id').val('');
+		$('#labelNew').text("新增文章 *");
+		if (tinymce.get('content')) {
+			tinymce.get('content').setContent('');
+		}
+		$('#category').selectpicker('val', []);
+		$('#createDate').val(new Date().toISOString().slice(0, 16));
+	}
 
 	$("#loadmore").click(function(){
 		var page=$("#page").val();
@@ -333,7 +352,15 @@
 				if(data && data.length > 0) {
 					var tableContent="";
 					$.each(data,function(i, Info){
-						tableContent += '<tr><td>'+Info.id+'</td><td><a href="/themes/JustNews/admin/edit.html?id='+Info.id+'" target="_blank">'+Info.title+'</a></td><td>'+(Info.createDate ? Info.createDate.replace("T"," ") : '')+'</td></tr>';
+						tableContent += `<tr id="article-row-${Info.id}">
+							<td>${Info.id}</td>
+							<td>${Info.title}</td>
+							<td>${Info.createDate ? Info.createDate.replace("T"," ") : ''}</td>
+							<td>
+								<button class="btn btn-primary btn-xs" onclick="editArticle('${Info.id}')">编辑</button>
+								<button class="btn btn-danger btn-xs" onclick="deleteArticle('${Info.id}')">删除</button>
+							</td>
+						</tr>`;
 					})
 					$("#articleList tbody").append(tableContent);
 					$("#page").val(++page);
@@ -344,8 +371,67 @@
 		});
 	})
 
+	function editArticle(id) {
+		$.ajax({
+			url: "/admin/get/" + id,
+			type: 'GET',
+			dataType: "json",
+			success: function(articleJson) {
+				if (articleJson) {
+					resetForm();
+					$('#id').val(articleJson.id);
+					$('#title').val(articleJson.title);
+					$('#img').val(articleJson.img);
+					$('#link').val(articleJson.link);
+					$('#createDate').val(articleJson.createDate.replace(" ", "T"));
+					$('#tags').val(articleJson.tags);
+					$('#priority').val(articleJson.priority !== undefined ? articleJson.priority : '0.5');
+					$('#changefreq').val(articleJson.changefreq !== undefined ? articleJson.changefreq : 'daily');
+					
+					if (tinymce.get('content')) {
+						tinymce.get('content').setContent(articleJson.content || '');
+					}
+
+					$('#category').selectpicker('val', articleJson['category[]'] || []);
+					
+					$('#labelNew').text("编辑文章: " + articleJson.id);
+					$('a[data-toggle="tab"][href="#new"]').tab('show');
+					
+					window.scrollTo(0, 0);
+
+				} else {
+					alert("获取文章失败！");
+				}
+			},
+			error: function() {
+				alert("请求文章数据失败，请检查网络或登录状态。");
+			}
+		});
+	}
+
+	function deleteArticle(id) {
+		if (confirm("确定要删除这篇文章吗？此操作不可恢复。")) {
+			$.ajax({
+				url: "/admin/delete/" + id,
+				type: 'POST',
+				dataType: "json",
+				success: function(result) {
+					if (result.msg === "OK") {
+						alert("删除成功！");
+						$('#article-row-' + id).remove();
+					} else {
+						alert("删除失败: " + result.msg);
+					}
+				},
+				error: function() {
+					alert("请求失败，请检查网络或登录状态。");
+				}
+			});
+		}
+	}
+
 	function saveAddNew(){
-		if($('#title').val() == "" || $('#createDate').val() == "" || $('#category').val() == ""){
+		if($('#title').val() == "" || $('#createDate').val() == "" || !$('#category').val() || $('#category').val().length === 0){
 			alert("标题、创建日期和分类为必填项！");
 			return;
 		}
@@ -359,6 +445,8 @@
 				if(result && result.msg === "OK"){
 					if (result.id){ $('#id').val(result.id); $('#labelNew').text("编辑文章: "+result.id); }
 					alert("保存成功！");
+					// Optional: switch back to the list view
+					// $('a[data-toggle="tab"][href="#list"]').tab('show');
 				} else { alert("保存失败: " + (result ? result.msg : '未知错误')); }
 			},
 			error: function() { alert("请求失败，请检查网络或登录状态。"); }
