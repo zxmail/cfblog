@@ -28,26 +28,13 @@ const Mustache = (function () {
 // --- END: Mustache.js v4.1.0 ---
 
 // ======================= CONFIGURATION START =======================
-// **在这里设置您的后台密码**
 const password = "123456"; 
 const theme = "JustNews";
 const cdn = "https://cfblog-9cc.pages.dev/themes";
 // ======================= CONFIGURATION END =========================
 
-// 站点信息
 let site = {
-	"title": "cf-blog",
-	"logo": cdn + "/" + theme + "/files/logo.png",
-	"siteName": "CF-BLOG",
-	"siteDescription": "cf-blog",
-	"copyRight": "Copyright © 2022",
-	"keyWords": "cf-blog",
-	"github": "-A-RA/cf-blog-plus",
-	"theme_github_path": cdn + "/",
-	"codeBeforHead": "",
-	"codeBeforBody": "",
-	"commentCode": "",
-	"widgetOther": "",
+	"title": "cf-blog", "logo": cdn + "/" + theme + "/files/logo.png", "siteName": "CF-BLOG", "siteDescription": "cf-blog", "copyRight": "Copyright © 2022", "keyWords": "cf-blog", "github": "-A-RA/cf-blog-plus", "theme_github_path": cdn + "/", "codeBeforHead": "", "codeBeforBody": "", "commentCode": "", "widgetOther": "",
 };
 
 export default {
@@ -61,16 +48,13 @@ async function handleRequest({ request, env, ctx }) {
 	const { pathname } = url;
 
 	try {
-		//首页
 		if (pathname === "/" || pathname.startsWith("/page/")) {
 			return await renderHTML(request, await getIndexData(request, env), theme + "/index.html", 200, env, ctx);
 		}
-		//文章
 		else if (pathname.startsWith("/article/")) {
 			let id = pathname.substring(9, pathname.lastIndexOf('/'));
 			return await renderHTML(request, await getArticleData(request, id, env), theme + "/article.html", 200, env, ctx);
 		}
-		//分类
 		else if (pathname.startsWith("/category/")) {
 			let key = pathname.substring(10, pathname.lastIndexOf('/'));
 			let page = 1;
@@ -80,7 +64,6 @@ async function handleRequest({ request, env, ctx }) {
 			}
 			return await renderHTML(request, await getCategoryOrTagsData(request, "category", key, page, env), theme + "/index.html", 200, env, ctx);
 		}
-		//标签
 		else if (pathname.startsWith("/tags/")) {
 			let key = pathname.substring(6, pathname.lastIndexOf('/'));
 			let page = 1;
@@ -90,68 +73,83 @@ async function handleRequest({ request, env, ctx }) {
 			}
 			return await renderHTML(request, await getCategoryOrTagsData(request, "tags", key, page, env), theme + "/index.html", 200, env, ctx);
 		}
-		//后台
 		else if (pathname.startsWith("/admin")) {
-            // **核心修复：先检查是否是请求后台主页，如果是，则不检查密码直接显示**
 			if (pathname === "/admin" || pathname === "/admin/" || pathname.endsWith("/admin/index.html")) {
 				let data = {};
-				data["widgetCategoryList"] = JSON.parse(await env.CONFIG.get("WidgetCategory"));
-				data["widgetMenuList"] = JSON.parse(await env.CONFIG.get("WidgetMenu"));
-				data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink"));
+				
+				// [CRITICAL FIX] Check for old category format and convert it for backward compatibility.
+				let rawCategories = await env.CONFIG.get("WidgetCategory");
+				let categories = [];
+				if (rawCategories) {
+					try {
+						let parsedCategories = JSON.parse(rawCategories);
+						if (Array.isArray(parsedCategories) && parsedCategories.length > 0 && typeof parsedCategories[0] === 'string') {
+							// Old format detected: ["catA", "catB"]. Convert it.
+							categories = parsedCategories.map(name => ({ name: name, icon: '' }));
+						} else {
+							// Already in new format: [{"name":"catA", "icon":""}] or empty array.
+							categories = parsedCategories;
+						}
+					} catch (e) {
+						categories = []; // In case of parsing error, default to empty.
+					}
+				}
+
+				data["widgetCategoryList"] = JSON.stringify(categories);
+				data["widgetMenuList"] = await env.CONFIG.get("WidgetMenu") || '[]';
+				data["widgetLinkList"] = await env.CONFIG.get("WidgetLink") || '[]';
 				return await renderHTML(request, data, theme + "/admin/index.html", 200, env, ctx);
 			}
-			// **对于所有其他的后台API请求，检查密码**
 			else if (checkPass(request)) {
-				//保存文章
+				//
 				if (pathname.startsWith("/admin/saveAddNew/")) {
 					let jsonA = await request.json();
 					let article = {};
 					jsonA.forEach(function (item) { article[item.name] = item.value; });
 					let id = Date.now().toString();
 					article.id = id;
-					article["category[]"] = JSON.parse(JSON.stringify(article["category[]"]));
-					article["contentHtml"] = await aesEncrypt(article.content, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
-					delete article.content;
-					let articleList = JSON.parse(await env.BLOG.get("articleList"));
+					let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
 					articleList.unshift(article);
 					await env.BLOG.put("articleList", JSON.stringify(articleList));
-					let data = { "id": id, "msg": "OK" };
-					return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' }});
+					return new Response(JSON.stringify({ "id": id, "msg": "OK" }), { status: 200, headers: { 'Content-Type': 'application/json' }});
 				}
-				//保存编辑
 				else if (pathname.startsWith("/admin/saveEdit/")) {
 					let jsonA = await request.json();
 					let article = {};
 					jsonA.forEach(function (item) { article[item.name] = item.value; });
-					article["category[]"] = JSON.parse(JSON.stringify(article["category[]"]));
-					article["contentHtml"] = await aesEncrypt(article.content, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
-					delete article.content;
-					let articleList = JSON.parse(await env.BLOG.get("articleList"));
+					let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
 					let id = article.id;
 					const index = articleList.findIndex(item => item.id === id)
-					articleList.splice(index, 1, article)
+					if (index > -1) {
+						articleList[index] = article;
+					}
 					await env.BLOG.put("articleList", JSON.stringify(articleList));
-					let data = { "id": id, "msg": "OK" };
-					return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' }});
+					return new Response(JSON.stringify({ "id": id, "msg": "OK" }), { status: 200, headers: { 'Content-Type': 'application/json' }});
 				}
-				//获取文章
 				else if (pathname.startsWith("/admin/get/")) {
-					let id = pathname.substring(12, pathname.lastIndexOf('/'));
-					let articleList = JSON.parse(await env.BLOG.get("articleList"));
+					let id = pathname.substring(12);
+					let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
 					let articleSingle = articleList.find(item => item.id === id);
-					articleSingle.content = await aesDecrypt(articleSingle.contentHtml, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
-					delete articleSingle.contentHtml;
 					return new Response(JSON.stringify(articleSingle), { status: 200, headers: { 'Content-Type': 'application/json' }});
 				}
-				//获取文章列表
 				else if (pathname.startsWith("/admin/getList/")) {
 					let page = pathname.substring(15, pathname.lastIndexOf('/'));
-					let articleList = JSON.parse(await env.BLOG.get("articleList"));
+					let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
 					let pageSize = 10;
 					let result = articleList.slice((page - 1) * pageSize, page * pageSize)
 					return new Response(JSON.stringify(result), { status: 200, headers: { 'Content-Type': 'application/json' }});
 				}
-				//保存配置
+				else if (pathname.startsWith("/admin/delete/")) {
+					let id = pathname.substring(14);
+					let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
+					const index = articleList.findIndex(item => item.id === id);
+					if (index > -1) {
+						articleList.splice(index, 1);
+						await env.BLOG.put("articleList", JSON.stringify(articleList));
+						return new Response(JSON.stringify({ "msg": "OK" }), { status: 200, headers: { 'Content-Type': 'application/json' }});
+					}
+					return new Response(JSON.stringify({ "msg": "Article not found" }), { status: 404, headers: { 'Content-Type': 'application/json' }});
+				}
 				else if (pathname.startsWith("/admin/saveConfig/")) {
 					let jsonA = await request.json();
 					let config = {};
@@ -159,10 +157,8 @@ async function handleRequest({ request, env, ctx }) {
 					await env.CONFIG.put("WidgetCategory", config.WidgetCategory);
 					await env.CONFIG.put("WidgetMenu", config.WidgetMenu);
 					await env.CONFIG.put("WidgetLink", config.WidgetLink);
-					let data = { "msg": "OK" };
-					return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' }});
+					return new Response(JSON.stringify({ "msg": "OK" }), { status: 200, headers: { 'Content-Type': 'application/json' }});
 				}
-				//导出
 				else if (pathname.startsWith("/admin/export/")) {
 					const CONFIG_keys = await env.CONFIG.list();
 					let CONFIG_json = {};
@@ -170,10 +166,8 @@ async function handleRequest({ request, env, ctx }) {
 					const BLOG_keys = await env.BLOG.list();
 					let BLOG_json = {};
 					for (const key of BLOG_keys.keys) { BLOG_json[key.name] = await env.BLOG.get(key.name); }
-					let data = { "CONFIG": CONFIG_json, "BLOG": BLOG_json, };
-					return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' }});
+					return new Response(JSON.stringify({ "CONFIG": CONFIG_json, "BLOG": BLOG_json, }), { status: 200, headers: { 'Content-Type': 'application/json' }});
 				}
-				//导入
 				else if (pathname.startsWith("/admin/import/")) {
 					let jsonA = await request.json();
 					let config = {};
@@ -181,59 +175,33 @@ async function handleRequest({ request, env, ctx }) {
 					let data = JSON.parse(config.importJson);
 					for (var key in data.CONFIG) { await env.CONFIG.put(key, data.CONFIG[key]); }
 					for (var key in data.BLOG) { await env.BLOG.put(key, data.BLOG[key]); }
-					let returnData = { "msg": "OK" };
-					return new Response(JSON.stringify(returnData), { status: 200, headers: { 'Content-Type': 'application/json' }});
+					return new Response(JSON.stringify({ "msg": "OK" }), { status: 200, headers: { 'Content-Type': 'application/json' }});
 				}
-				//发布
 				else if (pathname.startsWith("/admin/publish/")) {
-					const keys = await env.STATIC.list();
-					for (const key of keys.keys) { await env.STATIC.delete(key.name); }
-					let data = { "msg": "OK" };
-					return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' }});
+					const cache = caches.default;
+        			await cache.delete(new Request(new URL("/", request.url).toString()));
+					return new Response(JSON.stringify({ "msg": "OK" }), { status: 200, headers: { 'Content-Type': 'application/json' }});
 				}
 			}
-			// 如果是API请求但密码错误
 			else {
 				return new Response("Unauthorized", { status: 401 });
 			}
 		}
-		// sitemap
 		else if (pathname.startsWith("/sitemap.xml")) {
-			let articleList = JSON.parse(await env.BLOG.get("articleList"));
-			let xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"><url><loc>`+ url.origin + `</loc><lastmod>`+ new Date().toISOString() + `</lastmod><priority>1.00</priority></url>`;
+			let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
+			let xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 			for (const item of articleList) {
-				xml += `<url><loc>`+ url.origin + `/article/` + item.id + `/` + item.link + `</loc><lastmod>`+ new Date(item.createDate).toISOString() + `</lastmod><changefreq>`+ item.changefreq + `</changefreq><priority>`+ item.priority + `</priority></url>`;
+				xml += `<url><loc>${url.origin}/article/${item.id}/${item.link}</loc><lastmod>${new Date(item.createDate).toISOString()}</lastmod></url>`;
 			}
 			xml += `</urlset>`;
 			return new Response(xml, { status: 200, headers: { 'Content-Type': 'application/xml;charset=UTF-8' }});
-		}
-		// --- API路由 ---
-		else if (pathname.startsWith('/api/comments/') && !pathname.includes('all') && request.method === 'GET') {
-			const articleSlug = pathname.split('/')[3];
-			const comments = await env.COMMENTS_KV.get(articleSlug, { type: 'json' }) || [];
-			return new Response(JSON.stringify(comments), { headers: { 'Content-Type': 'application/json' } });
-		}
-		else if (pathname.startsWith('/api/comments/') && request.method === 'POST') {
-			try {
-				const articleSlug = pathname.split('/')[3];
-				let newComment = await request.json();
-				if(!newComment.content || newComment.content.trim() === '') { return new Response('评论内容不能为空', { status: 400 }); }
-				const comments = await env.COMMENTS_KV.get(articleSlug, { type: 'json' }) || [];
-				newComment.id = crypto.randomUUID();
-				newComment.timestamp = Date.now();
-				comments.push(newComment);
-				await env.COMMENTS_KV.put(articleSlug, JSON.stringify(comments));
-				return new Response(JSON.stringify(newComment), { status: 201, headers: { 'Content-Type': 'application/json' } });
-			} catch (e) {
-				return new Response(e.message, { status: 500 });
-			}
 		}
 		else if (pathname.startsWith('/api/comments/') && request.method === 'DELETE') {
 			const [_a, _b, _c, articleSlug, commentId] = pathname.split('/');
 			let comments = await env.COMMENTS_KV.get(articleSlug, { type: 'json' }) || [];
 			const updatedComments = comments.filter(c => c.id !== commentId);
 			await env.COMMENTS_KV.put(articleSlug, JSON.stringify(updatedComments));
-			return new Response('评论已删除', { status: 200 });
+			return new Response('Comment deleted', { status: 200 });
 		}
 		else if (pathname === '/api/comments_all' && request.method === 'GET') {
 			const allKeys = await env.COMMENTS_KV.list();
@@ -251,14 +219,21 @@ async function handleRequest({ request, env, ctx }) {
 			const slides = await env.CAROUSEL_KV.get('slides', { type: 'json' }) || [];
 			return new Response(JSON.stringify(slides), { headers: { 'Content-Type': 'application/json' } });
 		}
+		else if (pathname === '/api/carousel' && request.method === 'POST') {
+			let slides = await env.CAROUSEL_KV.get('slides', { type: 'json' }) || [];
+			let newSlide = await request.json();
+			newSlide.id = crypto.randomUUID();
+			slides.push(newSlide);
+			await env.CAROUSEL_KV.put('slides', JSON.stringify(slides));
+			return new Response(JSON.stringify(newSlide), { status: 201, headers: { 'Content-Type': 'application/json' } });
+		}
 		else if (pathname.startsWith('/api/carousel/') && request.method === 'DELETE') {
 			const slideId = pathname.split('/').pop();
 			let slides = await env.CAROUSEL_KV.get('slides', { type: 'json' }) || [];
 			const updatedSlides = slides.filter(s => s.id !== slideId);
 			await env.CAROUSEL_KV.put('slides', JSON.stringify(updatedSlides));
-			return new Response('轮播图已删除', { status: 200 });
+			return new Response('Carousel slide deleted', { status: 200 });
 		}
-		//静态文件
 		else {
 			return await getStaticFile(request, env, ctx);
 		}
@@ -269,9 +244,7 @@ async function handleRequest({ request, env, ctx }) {
 
 function checkPass(request) {
 	const cookie = request.headers.get("cookie");
-	if (!cookie) {
-		return false;
-	}
+	if (!cookie) return false;
 	const cookies = cookie.split(';').reduce((acc, c) => {
 		const [key, v] = c.trim().split('=');
 		acc[key] = decodeURIComponent(v);
@@ -297,8 +270,7 @@ async function getStaticFile(request, env, ctx) {
 async function renderHTML(request, data, path, status, env) {
 	const body = await render(data, path, env);
 	return new Response(body, {
-		status: status,
-		headers: { "Content-Type": "text/html;charset=UTF-8" },
+		status: status, headers: { "Content-Type": "text/html;charset=UTF-8" },
 	});
 }
 
@@ -306,62 +278,34 @@ async function render(data, template_path, env) {
     const templateUrl = cdn + "/" + template_path;
 	let templateResponse = await fetch(templateUrl);
 	let template = await templateResponse.text();
-    let renderData = { ...data };
-    renderData.OPT = site;
+    let renderData = { ...data, OPT: site };
 	return Mustache.render(template, renderData);
-}
-
-async function aesEncrypt(data, key, iv) {
-	const encodedData = new TextEncoder().encode(data);
-	const encodedKey = new TextEncoder().encode(key);
-	const encodedIv = new TextEncoder().encode(iv);
-	const cryptoKey = await crypto.subtle.importKey('raw', encodedKey, { name: 'AES-CBC' }, false, ['encrypt']);
-	const encrypted = await crypto.subtle.encrypt({ name: 'AES-CBC', iv: encodedIv }, cryptoKey, encodedData);
-	const buffer = new Uint8Array(encrypted);
-	return btoa(String.fromCharCode.apply(null, buffer));
-}
-
-async function aesDecrypt(data, key, iv) {
-	const buffer = Uint8Array.from(atob(data), c => c.charCodeAt(0));
-	const encodedKey = new TextEncoder().encode(key);
-	const encodedIv = new TextEncoder().encode(iv);
-	const cryptoKey = await crypto.subtle.importKey('raw', encodedKey, { name: 'AES-CBC' }, false, ['decrypt']);
-	const decrypted = await crypto.subtle.decrypt({ name: 'AES-CBC', iv: encodedIv }, cryptoKey, buffer);
-	return new TextDecoder().decode(decrypted);
 }
 
 async function getIndexData(request, env) {
 	let url = new URL(request.url);
-	let pathname = url.pathname;
 	let page = 1;
-	if (pathname.startsWith("/page/")) {
-		page = pathname.substring(6, pathname.lastIndexOf('/'));
+	if (url.pathname.startsWith("/page/")) {
+		page = parseInt(url.pathname.substring(6, url.pathname.lastIndexOf('/')));
 	}
-	let articleList = JSON.parse(await env.BLOG.get("articleList"));
+	let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
 	let pageSize = 10;
 	let result = articleList.slice((page - 1) * pageSize, page * pageSize)
 	for (const item of result) {
-		item.url = "/article/" + item.id + "/" + item.link + "/";
+		item.url = `/article/${item.id}/${item.link}/`;
 		item.createDate10 = item.createDate.substring(0, 10);
-		item.contentHtml = await aesDecrypt(item.contentHtml, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
-		item.contentText = item.contentHtml.replace(/<[^>]+>/g, "").substring(0, 100);
+		item.contentText = (item.content || "").replace(/<[^>]+>/g, "").substring(0, 100);
 	}
 	let data = {};
-	data["title"] = site.siteName;
-	data["keyWords"] = site.keyWords;
 	data["articleList"] = result;
-	if (page > 1)
-		data["pageNewer"] = { "url": "/page/" + (page - 1) + "/", "title": "上一页" };
-	if (articleList.length > page * pageSize)
-		data["pageOlder"] = { "url": "/page/" + (parseInt(page) + 1) + "/", "title": "下一页" };
-	data["widgetCategoryList"] = JSON.parse(await env.CONFIG.get("WidgetCategory"));
-	data["widgetMenuList"] = JSON.parse(await env.CONFIG.get("WidgetMenu"));
-	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink"));
-	let widgetRecentlyList = JSON.parse(await env.BLOG.get("articleList"));
-	widgetRecentlyList = widgetRecentlyList.slice(0, 5)
+	if (page > 1) data["pageNewer"] = { "url": `/page/${page - 1}/`};
+	if (articleList.length > page * pageSize) data["pageOlder"] = { "url": `/page/${page + 1}/`};
+	data["widgetCategoryList"] = JSON.parse(await env.CONFIG.get("WidgetCategory") || "[]");
+	data["widgetMenuList"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
+	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink") || "[]");
+	let widgetRecentlyList = articleList.slice(0, 5);
 	for (const item of widgetRecentlyList) {
-		item.url = "/article/" + item.id + "/" + item.link + "/";
-		item.createDate10 = item.createDate.substring(0, 10);
+		item.url = `/article/${item.id}/${item.link}/`;
 	}
 	data["widgetRecentlyList"] = widgetRecentlyList;
 	return data;
@@ -369,70 +313,64 @@ async function getIndexData(request, env) {
 
 async function getArticleData(request, id, env) {
 	let data = {};
-	let articleList = JSON.parse(await env.BLOG.get("articleList"));
+	let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
 	let articleSingle = articleList.find(item => item.id === id);
-	articleSingle.url = "/article/" + articleSingle.id + "/" + articleSingle.link + "/";
-	articleSingle.createDate10 = articleSingle.createDate.substring(0, 10);
-	articleSingle.contentHtml = await aesDecrypt(articleSingle.contentHtml, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
+	if (!articleSingle) return new Response("Article not found", { status: 404 });
+	
+	articleSingle.url = `/article/${articleSingle.id}/${articleSingle.link}/`;
 	data["articleSingle"] = articleSingle;
-	data["title"] = articleSingle.title;
-	data["keyWords"] = articleSingle.tags;
+	
 	const index = articleList.findIndex(item => item.id === id)
 	if (index > 0) {
-		let articleNewer = articleList[index - 1];
-		data["articleNewer"] = { "img": articleNewer.img, "url": "/article/" + articleNewer.id + "/" + articleNewer.link + "/", "title": articleNewer.title, "createDate10": articleNewer.createDate.substring(0, 10), };
+		data["articleNewer"] = { ...articleList[index - 1], url: `/article/${articleList[index - 1].id}/${articleList[index - 1].link}/` };
 	}
 	if (index < articleList.length - 1) {
-		let articleOlder = articleList[index + 1];
-		data["articleOlder"] = { "img": articleOlder.img, "url": "/article/" + articleOlder.id + "/" + articleOlder.link + "/", "title": articleOlder.title, "createDate10": articleOlder.createDate.substring(0, 10), };
+		data["articleOlder"] = { ...articleList[index + 1], url: `/article/${articleList[index + 1].id}/${articleList[index + 1].link}/` };
 	}
-	data["widgetCategoryList"] = JSON.parse(await env.CONFIG.get("WidgetCategory"));
-	data["widgetMenuList"] = JSON.parse(await env.CONFIG.get("WidgetMenu"));
-	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink"));
-	let widgetRecentlyList = JSON.parse(await env.BLOG.get("articleList"));
-	widgetRecentlyList = widgetRecentlyList.slice(0, 5)
+
+	data["widgetCategoryList"] = JSON.parse(await env.CONFIG.get("WidgetCategory") || "[]");
+	data["widgetMenuList"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
+	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink") || "[]");
+	let widgetRecentlyList = articleList.slice(0, 5);
 	for (const item of widgetRecentlyList) {
-		item.url = "/article/" + item.id + "/" + item.link + "/";
-		item.createDate10 = item.createDate.substring(0, 10);
+		item.url = `/article/${item.id}/${item.link}/`;
 	}
 	data["widgetRecentlyList"] = widgetRecentlyList;
 	return data;
 }
 
 async function getCategoryOrTagsData(request, type, key, page, env) {
-	let articleList = JSON.parse(await env.BLOG.get("articleList"));
+	let articleList = JSON.parse(await env.BLOG.get("articleList") || "[]");
 	let result = [];
+	const decodedKey = decodeURI(key);
 	for (const item of articleList) {
-		if (type == "category") {
-			if (item["category[]"].includes(decodeURI(key))) { result.push(item); }
+		if (type === "category") {
+			if (Array.isArray(item['category[]']) && item['category[]'].includes(decodedKey)) {
+				result.push(item);
+			}
 		} else {
-			if (item.tags.includes(decodeURI(key))) { result.push(item); }
+			if (item.tags && item.tags.includes(decodedKey)) {
+				result.push(item);
+			}
 		}
 	}
 	let pageSize = 10;
-	let resultPage = result.slice((page - 1) * pageSize, page * pageSize)
+	let resultPage = result.slice((page - 1) * pageSize, page * pageSize);
 	for (const item of resultPage) {
-		item.url = "/article/" + item.id + "/" + item.link + "/";
-		item.createDate10 = item.createDate.substring(0, 10);
-		item.contentHtml = await aesDecrypt(item.contentHtml, await env.CONFIG.get("AES_KEY"), await env.CONFIG.get("AES_IV"));
-		item.contentText = item.contentHtml.replace(/<[^>]+>/g, "").substring(0, 100);
+		item.url = `/article/${item.id}/${item.link}/`;
+		item.contentText = (item.content || "").replace(/<[^>]+>/g, "").substring(0, 100);
 	}
 	let data = {};
-	data["title"] = key;
-	data["keyWords"] = key;
 	data["articleList"] = resultPage;
-	if (page > 1)
-		data["pageNewer"] = { "url": "/" + type + "/" + key + "/page/" + (page - 1) + "/", "title": "上一页" };
-	if (result.length > page * pageSize)
-		data["pageOlder"] = { "url": "/" + type + "/" + key + "/page/" + (parseInt(page) + 1) + "/", "title": "下一页" };
-	data["widgetCategoryList"] = JSON.parse(await env.CONFIG.get("WidgetCategory"));
-	data["widgetMenuList"] = JSON.parse(await env.CONFIG.get("WidgetMenu"));
-	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink"));
-	let widgetRecentlyList = JSON.parse(await env.BLOG.get("articleList"));
-	widgetRecentlyList = widgetRecentlyList.slice(0, 5)
+	if (page > 1) data["pageNewer"] = { "url": `/${type}/${key}/page/${page - 1}/`};
+	if (result.length > page * pageSize) data["pageOlder"] = { "url": `/${type}/${key}/page/${page + 1}/`};
+
+	data["widgetCategoryList"] = JSON.parse(await env.CONFIG.get("WidgetCategory") || "[]");
+	data["widgetMenuList"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
+	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink") || "[]");
+	let widgetRecentlyList = articleList.slice(0, 5);
 	for (const item of widgetRecentlyList) {
-		item.url = "/article/" + item.id + "/" + item.link + "/";
-		item.createDate10 = item.createDate.substring(0, 10);
+		item.url = `/article/${item.id}/${item.link}/`;
 	}
 	data["widgetRecentlyList"] = widgetRecentlyList;
 	return data;
