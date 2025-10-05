@@ -27,42 +27,51 @@
 
 		{{ &OPT.codeBeforHead }}
 	 <style>
-/* 10. 新增：海报轮播的左右箭头样式 */
-        .swiper-container.carousel .swiper-button-next,
-        .swiper-container.carousel .swiper-button-prev {
-            background-image: none !important; /* 强制移除默认的背景图 */
-            width: 40px;
-            height: 40px;
-            margin-top: -20px; /* 垂直居中 */
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 50%; /* 改为圆形 */
-            color: #fff !important;
-            transition: background-color 0.3s ease;
-        }
+	/* 10. 海报轮播的左右箭头样式 (最终更新版) */
+    .swiper-container.carousel .swiper-button-next,
+    .swiper-container.carousel .swiper-button-prev {
+        background-image: none !important;
+        width: 40px;
+        height: 40px;
+        margin-top: -20px;
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 50%;
+        color: #fff !important;
+        transition: all 0.3s ease; /* 修改：让所有变化的过渡都更平滑 */
+        
+        /* 本次新增：默认隐藏箭头 */
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    /* 本次新增：当鼠标悬停在整个轮播图上时，显示箭头 */
+    .swiper-container.carousel:hover .swiper-button-next,
+    .swiper-container.carousel:hover .swiper-button-prev {
+        opacity: 1;
+        visibility: visible;
+    }
 
-        /* 鼠标悬停时改变背景色 */
-        .swiper-container.carousel .swiper-button-next:hover,
-        .swiper-container.carousel .swiper-button-prev:hover {
-            background-color: rgba(0, 0, 0, 0.4);
-        }
+    /* 鼠标悬停在箭头上时改变背景色 */
+    .swiper-container.carousel .swiper-button-next:hover,
+    .swiper-container.carousel .swiper-button-prev:hover {
+        background-color: rgba(0, 0, 0, 0.4);
+    }
 
-        /* 使用 Font Awesome 图标替换默认箭头 */
-        .swiper-container.carousel .swiper-button-next:after,
-        .swiper-container.carousel .swiper-button-prev:after {
-            font-family: "Font Awesome 5 Pro"; /* cfblog项目中已包含此字体 */
-            font-size: 16px;
-            font-weight: 900; /* 使用 Solid 样式的图标 */
-        }
+    /* 使用 Font Awesome 图标替换默认箭头 */
+    .swiper-container.carousel .swiper-button-next:after,
+    .swiper-container.carousel .swiper-button-prev:after {
+        font-family: "Font Awesome 5 Pro";
+        font-size: 16px;
+        font-weight: 900;
+    }
 
-        /* 定义左箭头的图标 */
-        .swiper-container.carousel .swiper-button-prev:after {
-            content: '\f053';
-        }
+    .swiper-container.carousel .swiper-button-prev:after {
+        content: '\f053';
+    }
 
-        /* 定义右箭头的图标 */
-        .swiper-container.carousel .swiper-button-next:after {
-            content: '\f054';
-        }
+    .swiper-container.carousel .swiper-button-next:after {
+        content: '\f054';
+    }
     </style>
 	</head>
 	<body class="archive paged category category-zhishi category-5 paged-2 category-paged-2 lang-cn el-boxed">
