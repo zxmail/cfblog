@@ -10016,7 +10016,7 @@ body>header.header .logo {
 	max-height:26px
 }
 }body>header.header .primary-menu {
-	margin-left:20px
+	margin-left:6px
 }
 body>header.header .nav {
 	font-size:14px
@@ -14282,7 +14282,7 @@ body>header.header.header-style-2 .icon-bar {
 }
 .search-form {
 	overflow:hidden;
-	background:#fff
+	background:#efefef
 }
 .search-form input {
 	background:0 0;
