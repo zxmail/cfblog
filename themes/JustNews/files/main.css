@@ -17244,74 +17244,115 @@ body>header.header .logo img {
 .screen-reader-text {
     display: none;
 }
-/* 12. 新增：移动端页头样式 (已整合图标美化) */
+/* --- BEGIN CUSTOM STYLES --- */
+
+/* ... (保留之前1-8和10-11的自定义样式) ... */
+
+/* --- 9. 响应式页头布局 (最终版) --- */
+/* 桌面端布局 (> 991px) */
+@media (min-width: 992px) {
+    .header .container {
+        display: flex;
+        align-items: center;
+    }
+    .header .desktop-actions {
+        display: flex;
+        align-items: center;
+        margin-left: auto; /* 将右侧所有内容推到最右边 */
+    }
+    .header .navbar-nav {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+    /* 在桌面端隐藏移动端元素 */
+    .mobile-navbar-toggle,
+    .mobile-search-trigger {
+        display: none;
+    }
+}
+
+/* 移动端布局 (<= 991px) */
 @media (max-width: 991px) {
-    /* 使用Flex布局对齐Logo和右侧图标组 */
     .header .container {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        height: 60px; /* 固定页头高度 */
     }
-
-    /* 隐藏桌面版的搜索框和登录按钮 */
-    .header .header-search,
-    .header .navbar-action {
+    /* 三栏布局：各占1/3，实现左中右对齐 */
+    .header .container > .mobile-navbar-toggle {
+        flex: 1;
+        text-align: left;
+    }
+    .header .container > .logo {
+        flex: 1;
+        text-align: center;
+    }
+    .header .container > .header-right-actions {
+        flex: 1;
+        text-align: right;
+    }
+    .header .logo a, .header .logo img {
+        display: inline-block;
+        margin: 0;
+    }
+    /* 在移动端隐藏桌面端元素 */
+    .desktop-actions,
+    .primary-menu {
         display: none;
     }
-    
-    /* 隐藏主题默认的、在Logo左侧的汉堡按钮 */
-    .header .navbar-header .navbar-toggle {
-        display: none;
-    }
-
-    /* 显示我们新增的移动端图标容器 */
-    .mobile-header-icons {
-        display: flex;
-        align-items: center;
-    }
-
-    /* 设置移动端图标的样式 */
-    .mobile-header-icons > a,
-    .mobile-header-icons > button {
-        font-size: 18px; /* 图标大小 */
-        color: #555; /* 图标颜色 */
-        padding: 5px;
-        margin-left: 10px; /* 图标之间的间距 */
+    /* 显示和美化移动端图标 */
+    .mobile-navbar-toggle,
+    .mobile-search-trigger {
+        display: inline-block;
         background: none;
         border: none;
-    }
-    
-    /* 调整折叠菜单的位置和样式 */
-    .header .navbar-collapse {
-        position: absolute;
-        top: 60px; /* 根据您的页头高度微调 */
-        left: 0;
-        right: 0;
-        width: 100%;
-        background-color: #fff;
-        box-shadow: 0 5px 5px -5px rgba(0,0,0,0.2);
-        border-top: 1px solid #f0f0f0;
-    }
-
-    /* --- 本次新增：美化新的移动端菜单汉堡图标 --- */
-    .navbar-toggle {
-        background: transparent !important;
-        border: none !important;
+        color: #333;
+        font-size: 18px;
         padding: 8px;
     }
-
-    .navbar-toggle .fa-bars {
-        font-size: 22px;
-        color: #555;
+    /* 调整折叠菜单的位置 */
+    #wrap > .navbar-collapse {
+        position: absolute;
+        width: 100%;
+        background-color: #fff;
+        z-index: 999;
+        box-shadow: 0 3px 3px rgba(0,0,0,0.05);
     }
-    /* --- 新增结束 --- */
+    /* 移动端搜索框样式 */
+    .mobile-search-wrapper {
+        position: absolute;
+        top: 60px; /* 紧贴页头下方 */
+        left: 0;
+        width: 100%;
+        background-color: #f7f7f7;
+        padding: 15px;
+        z-index: 1000;
+        box-shadow: 0 3px 3px rgba(0,0,0,0.05);
+    }
+    .search-form-mobile {
+        position: relative;
+    }
+    .search-field-mobile {
+        width: 100%;
+        padding: 10px 40px 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        -webkit-appearance: none;
+    }
+    .close-search-trigger {
+        position: absolute;
+        top: 50%;
+        right: 15px;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #999;
+        font-weight: 300;
+    }
 }
 
-/* 在桌面端隐藏移动版的图标 */
-@media (min-width: 992px) {
-    .mobile-header-icons {
-        display: none;
-    }
-}
+/* --- END CUSTOM STYLES --- */
 .gfm-task-list { border: 1px solid transparent; list-style-type: none; } .gfm-task-list input { margin-right: 10px !important; } code.kb-btn { display: inline-block; color: #666; font: bold 9pt arial; text-decoration: none; text-align: center; padding: 2px 5px; margin: 0 5px; background: #eff0f2; -moz-border-radius: 4px; border-radius: 4px; border-top: 1px solid #f5f5f5; -webkit-box-shadow: inset 0 0 20px #e8e8e8, 0 1px 0 #c3c3c3, 0 1px 0 #c9c9c9, 0 1px 2px #333; -moz-box-shadow: inset 0 0 20px #e8e8e8, 0 1px 0 #c3c3c3, 0 1px 0 #c9c9c9, 0 1px 2px #333; box-shadow: inset 0 0 20px #e8e8e8, 0 1px 0 #c3c3c3, 0 1px 0 #c9c9c9, 0 1px 2px #333; text-shadow: 0px 1px 0px #f5f5f5; } .copy-button { cursor: pointer; border: 0; font-size: 12px; text-transform: uppercase; font-weight: 500; padding: 3px 6px 3px 6px; background-color: rgba(255, 255, 255, 0.6); position: absolute; overflow: hidden; top: 5px; right: 5px; border-radius: 3px; } .copy-button:before { content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 3px; background-size: contain; background-image: url("data:image/svg+xml,%3Csvg version=\'1.1\' xmlns=\'http://www.w3.org/2000/svg\' xmlns:xlink=\'http://www.w3.org/1999/xlink\' x=\'0px\' y=\'0px\' width=\'16px\' height=\'16px\' viewBox=\'888 888 16 16\' enable-background=\'new 888 888 16 16\' xml:space=\'preserve\'%3E %3Cpath fill=\'%23333333\' d=\'M903.143,891.429c0.238,0,0.44,0.083,0.607,0.25c0.167,0.167,0.25,0.369,0.25,0.607v10.857 c0,0.238-0.083,0.44-0.25,0.607s-0.369,0.25-0.607,0.25h-8.571c-0.238,0-0.44-0.083-0.607-0.25s-0.25-0.369-0.25-0.607v-2.571 h-4.857c-0.238,0-0.44-0.083-0.607-0.25s-0.25-0.369-0.25-0.607v-6c0-0.238,0.06-0.5,0.179-0.786s0.262-0.512,0.428-0.679 l3.643-3.643c0.167-0.167,0.393-0.309,0.679-0.428s0.547-0.179,0.786-0.179h3.714c0.238,0,0.44,0.083,0.607,0.25 c0.166,0.167,0.25,0.369,0.25,0.607v2.929c0.404-0.238,0.785-0.357,1.143-0.357H903.143z M898.286,893.331l-2.67,2.669h2.67V893.331 z M892.571,889.902l-2.669,2.669h2.669V889.902z M894.321,895.679l2.821-2.822v-3.714h-3.428v3.714c0,0.238-0.083,0.441-0.25,0.607 s-0.369,0.25-0.607,0.25h-3.714v5.714h4.571v-2.286c0-0.238,0.06-0.5,0.179-0.786C894.012,896.071,894.155,895.845,894.321,895.679z M902.857,902.857v-10.286h-3.429v3.714c0,0.238-0.083,0.441-0.25,0.607c-0.167,0.167-0.369,0.25-0.607,0.25h-3.714v5.715H902.857z\' /%3E %3C/svg%3E"); background-repeat: no-repeat; position: relative; top: 3px; } pre { position: relative; } pre:hover .copy-button { background-color: rgba(255, 255, 255, 0.9); } .md-widget-toc { padding: 15px; } .md-widget-toc a { color: #333333; } .post-toc-header { font-weight: 600; margin-bottom: 10px; } .md-post-toc { font-size: 0.9em; } .post h2 { overflow: hidden; } .post-toc-block { margin: 0 10px 20px 10px; overflow: hidden; } .post-toc-block.with-border { border: 1px #dddddd solid; padding: 10px; } .post-toc-block.float-right { max-width: 320px; float: right; } .post-toc-block.float-left { max-width: 320px; float: left; } .md-widget-toc ul, .md-widget-toc ol, .md-post-toc ul, .md-post-toc ol { padding-left: 15px; margin: 0; } .md-widget-toc ul ul, .md-widget-toc ul ol, .md-widget-toc ol ul, .md-widget-toc ol ol, .md-post-toc ul ul, .md-post-toc ul ol, .md-post-toc ol ul, .md-post-toc ol ol { padding-left: 2em; } .md-widget-toc ul ol, .md-post-toc ul ol { list-style-type: lower-roman; } .md-widget-toc ul ul ol, .md-widget-toc ul ol ol, .md-post-toc ul ul ol, .md-post-toc ul ol ol { list-style-type: lower-alpha; } .md-widget-toc ol ul, .md-widget-toc ol ol, .md-post-toc ol ul, .md-post-toc ol ol { padding-left: 2em; } .md-widget-toc ol ol, .md-post-toc ol ol { list-style-type: lower-roman; } .md-widget-toc ol ul ol, .md-widget-toc ol ol ol, .md-post-toc ol ul ol, .md-post-toc ol ol ol { list-style-type: lower-alpha; }
 .recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}
