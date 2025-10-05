@@ -10464,7 +10464,7 @@ body.visual-editor>header.header {
 	height:26px;
 	font-size:0;
 	margin-top:0px;
-	margin-left:1px
+	margin-left:0px
 }
 .navbar-action #j-user-wrap {
 	display:inline-block;
@@ -17211,7 +17211,7 @@ body>header.header .logo img {
 /* 11. 新增：页头搜索模块样式 */
 .header-search {
     margin-left: 20px; /* 与左侧菜单的间距 */
-    margin-right: 15px; /* 与右侧登录按钮的间距 */
+    margin-right: 0px; /* 与右侧登录按钮的间距 */
 }
 .search-form {
     position: relative;
