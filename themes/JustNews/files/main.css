@@ -17244,72 +17244,114 @@ body>header.header .logo img {
 .screen-reader-text {
     display: none;
 }
-/* 12. 新增：移动端页头样式 (已整合图标美化) */
+/* 12. 移动端页头新布局 */
 @media (max-width: 991px) {
-    /* 使用Flex布局对齐Logo和右侧图标组 */
     .header .container {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        position: relative; /* For search form positioning */
     }
 
-    /* 隐藏桌面版的搜索框和登录按钮 */
+    .header .navbar-header {
+        display: flex;
+        align-items: center;
+        flex-grow: 1; /* Allows logo to center */
+        justify-content: center; /* Center the logo */
+        padding-left: 40px; /* Space for hamburger */
+        padding-right: 40px; /* Space for search */
+    }
+
+    .header .logo {
+        /* The logo is now centered by its parent's justify-content */
+    }
+
+    .header .navbar-toggle {
+        display: block;
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        margin: 0;
+    }
+
+    .header .mobile-header-icons {
+        display: flex;
+        align-items: center;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .mobile-header-icons > a {
+        font-size: 18px;
+        color: #555;
+        padding: 5px;
+    }
+
+    /* Hide desktop elements on mobile */
     .header .header-search,
     .header .navbar-action {
         display: none;
     }
-    
-    /* 隐藏主题默认的、在Logo左侧的汉堡按钮 */
-    .header .navbar-header .navbar-toggle {
-        display: none;
-    }
 
-    /* 显示我们新增的移动端图标容器 */
-    .mobile-header-icons {
+    /* Styles for the mobile search form that appears on click */
+    .mobile-search-form {
+        display: none; /* Initially hidden */
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        padding: 10px 15px;
+        box-shadow: 0 4px 5px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
+    
+    .mobile-search-form .search-form {
         display: flex;
-        align-items: center;
     }
 
-    /* 设置移动端图标的样式 */
-    .mobile-header-icons > a,
-    .mobile-header-icons > button {
-        font-size: 18px; /* 图标大小 */
-        color: #555; /* 图标颜色 */
-        padding: 5px;
-        margin-left: 10px; /* 图标之间的间距 */
-        background: none;
-        border: none;
+    .mobile-search-form .search-field {
+        flex-grow: 1;
+        -webkit-appearance: none;
+        border: 1px solid #ddd;
+        padding: 8px 10px;
+        border-radius: 3px;
     }
-    
-    /* 调整折叠菜单的位置和样式 */
+    .mobile-search-form .search-field:focus {
+        border-color: #ccc;
+        outline: none;
+    }
+
+    .mobile-search-form .search-submit {
+        position: static;
+        background: #333;
+        color: #fff;
+        border: none;
+        padding: 0 15px;
+        margin-left: 5px;
+        border-radius: 3px;
+    }
+
+    /* Adjust the main menu dropdown */
     .header .navbar-collapse {
         position: absolute;
-        top: 60px; /* 根据您的页头高度微调 */
+        top: 50px; /* Adjust based on your header height */
         left: 0;
-        right: 0;
         width: 100%;
         background-color: #fff;
         box-shadow: 0 5px 5px -5px rgba(0,0,0,0.2);
         border-top: 1px solid #f0f0f0;
+        z-index: 999;
     }
-
-    /* --- 本次新增：美化新的移动端菜单汉堡图标 --- */
-    .navbar-toggle {
-        background: transparent !important;
-        border: none !important;
-        padding: 8px;
-    }
-
-    .navbar-toggle .fa-bars {
-        font-size: 22px;
-        color: #555;
-    }
-    /* --- 新增结束 --- */
 }
 
-/* 在桌面端隐藏移动版的图标 */
+/* Hide mobile elements on desktop */
 @media (min-width: 992px) {
-    .mobile-header-icons {
+    .mobile-header-icons,
+    .mobile-search-form {
         display: none;
     }
 }
