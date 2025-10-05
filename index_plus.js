@@ -347,7 +347,6 @@ async function getIndexData(request, env) {
 	if (page > 1) data["pageNewer"] = { "url": `/page/${page - 1}/`};
 	if (articleList.length > page * pageSize) data["pageOlder"] = { "url": `/page/${page + 1}/`};
 	data["widgetCategoryList"] = JSON.parse(await env.CONFIG.get("WidgetCategory") || "[]");
-	data["nav"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
 	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink") || "[]");
 	let widgetRecentlyList = articleList.slice(0, 5);
 	for (const item of widgetRecentlyList) {
@@ -385,7 +384,6 @@ async function getArticleData(request, id, env) {
 	}
 
 	data["widgetCategoryList"] = allCategories;
-	data["nav"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
 	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink") || "[]");
 	let widgetRecentlyList = articleList.slice(0, 5);
 	for (const item of widgetRecentlyList) {
@@ -423,7 +421,6 @@ async function getCategoryOrTagsData(request, type, key, page, env) {
 	if (result.length > page * pageSize) data["pageOlder"] = { "url": `/${type}/${key}/page/${page + 1}/`};
 
 	data["widgetCategoryList"] = JSON.parse(await env.CONFIG.get("WidgetCategory") || "[]");
-	data["nav"] = JSON.parse(await env.CONFIG.get("WidgetMenu") || "[]");
 	data["widgetLinkList"] = JSON.parse(await env.CONFIG.get("WidgetLink") || "[]");
 	let widgetRecentlyList = articleList.slice(0, 5);
 	for (const item of widgetRecentlyList) {
