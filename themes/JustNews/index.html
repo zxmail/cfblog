@@ -26,48 +26,6 @@
 		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/icons-2.6.4.js?ver=6.1.2' id='wpcom-icons-js'></script>
 
 		{{ &OPT.codeBeforHead }}
- <style>
-        /* 1. 默认隐藏所有子菜单 */
-        .primary-menu .sub-menu {
-            display: none;
-            position: absolute;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        /* 2. 当鼠标悬停在有子菜单的列表项上时，显示其直接子菜单 */
-        .primary-menu .menu-item-has-children:hover > .sub-menu {
-            display: block;
-        }
-
-        /* 3. 为三级及更深层次的菜单设置弹出位置（从父菜单项的右侧弹出） */
-        .primary-menu .sub-menu .menu-item-has-children > .sub-menu {
-            top: 0;
-            left: 100%;
-        }
-    </style>
-	</head>
-	<body class="archive paged category category-zhishi category-5 paged-2 category-paged-2 lang-cn el-boxed">
-		<header class="header">
-			<div class="container clearfix">
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-						<span class="icon-bar icon-bar-1"></span>
-						<span class="icon-bar icon-bar-2"></span>
-						<span class="icon-bar icon-bar-3"></span>
-					</button>
-					<div class="logo">
-						{{ #OPT.logo }}
-						<a href="/" rel="home"><img src="{{ &OPT.logo }}" alt="{{ &OPT.siteName }}"></a>
-						{{ /OPT.logo }}
-						
-						{{ ^OPT.logo }}
-						<a href="/" rel="home"><img src="{{ &OPT.theme_github_path }}JustNews/files/logo2.png" alt="请自定义OPT.logo"></a>
-						{{ /OPT.logo }}
-					</div>
-				</div>
-				<div class="collapse navbar-collapse">
     <style>
         /* 1. 默认隐藏所有子菜单并重置列表样式 */
         .primary-menu .sub-menu {
@@ -100,6 +58,62 @@
             white-space: nowrap; /* 防止文字换行 */
         }
     </style>
+	</head>
+	<body class="archive paged category category-zhishi category-5 paged-2 category-paged-2 lang-cn el-boxed">
+		<header class="header">
+			<div class="container clearfix">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+						<span class="icon-bar icon-bar-1"></span>
+						<span class="icon-bar icon-bar-2"></span>
+						<span class="icon-bar icon-bar-3"></span>
+					</button>
+					<div class="logo">
+						{{ #OPT.logo }}
+						<a href="/" rel="home"><img src="{{ &OPT.logo }}" alt="{{ &OPT.siteName }}"></a>
+						{{ /OPT.logo }}
+						
+						{{ ^OPT.logo }}
+						<a href="/" rel="home"><img src="{{ &OPT.theme_github_path }}JustNews/files/logo2.png" alt="请自定义OPT.logo"></a>
+						{{ /OPT.logo }}
+					</div>
+				</div>
+				<div class="collapse navbar-collapse">
+<nav class="navbar-left primary-menu">
+    <ul id="menu-%e5%af%bc%e8%88%aa" class="nav navbar-nav wpcom-adv-menu">
+        {{ #widgetMenuList }}
+        <li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
+            <a href="{{ &url }}">
+                {{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
+            </a>
+            
+            {{! ------------------ 二级菜单开始 ------------------ }}
+            {{ #children }}
+            <ul class="sub-menu">
+                {{ #. }}
+                <li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
+                    <a href="{{ &url }}">
+                        {{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
+                    </a>
+                    
+                    {{! ------------------ 三级菜单开始 ------------------ }}
+                    {{ #children }}
+                    <ul class="sub-menu">
+                        {{ #. }}
+                        <li class="menu-item"><a href="{{ &url }}">{{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}</a></li>
+                        {{ /. }}
+                    </ul>
+                    {{ /children }}
+                    {{! ------------------ 三级菜单结束 ------------------ }}
+                </li>
+                {{ /. }}
+            </ul>
+            {{ /children }}
+            {{! ------------------ 二级菜单结束 ------------------ }}
+        </li>
+        {{ /widgetMenuList }}
+    </ul>
+</nav>
 					<div class="navbar-action pull-right">
 						<div id="j-user-wrap">
 							<a class="login cur" href="/admin">登录</a>
