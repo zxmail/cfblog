@@ -27,35 +27,40 @@
 
 		{{ &OPT.codeBeforHead }}
     <style>
-        /* 1. 默认隐藏所有子菜单并重置列表样式 */
+        /* 1. 重置子菜单样式并默认隐藏 */
         .primary-menu .sub-menu {
-            display: none;
+            display: none; /* 默认隐藏，等待JS点击来显示 */
             position: absolute;
             background-color: #fff;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             z-index: 100;
-            /* 新增：移除黑点和左侧缩进 */
             list-style: none;
             padding: 0;
             margin: 0;
+            min-width: 180px; /* 设置子菜单最小宽度 */
         }
-
-        /* 2. 当鼠标悬停在有子菜单的列表项上时，显示其直接子菜单 */
-        .primary-menu .menu-item-has-children:hover > .sub-menu {
-            display: block;
-        }
-
-        /* 3. 为三级及更深层次的菜单设置弹出位置（从父菜单项的右侧弹出） */
+        /* 2. 定位三级及更深层次的菜单 */
         .primary-menu .sub-menu .menu-item-has-children > .sub-menu {
             top: 0;
             left: 100%;
         }
-
-        /* 4. （可选）为子菜单项添加一些内边距，让文字不要紧贴边框 */
+        /* 3. 子菜单链接样式 */
         .primary-menu .sub-menu a {
             padding: 8px 15px;
             display: block;
-            white-space: nowrap; /* 防止文字换行 */
+            white-space: nowrap;
+        }        
+        /* 4. 箭头图标样式 */
+        .menu-arrow {
+            float: right; /* 让箭头靠右对齐 */
+            margin-left: 8px;
+            margin-top: 4px; /* 微调垂直位置 */
+            font-size: 0.8em; /* 让箭头小一点 */
+            transition: transform 0.3s ease; /* 添加旋转动画效果 */
+        }
+        /* 5. 当菜单项被点击展开后 (li.menu-open)，旋转箭头 */
+        .primary-menu .menu-item.menu-open > a > .menu-arrow {
+            transform: rotate(-90deg); /* 旋转-90度，箭头朝右 */
         }
     </style>
 	</head>
@@ -85,18 +90,18 @@
         <li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
             <a href="{{ &url }}">
                 {{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
+                {{ #children }}<i class="fas fa-chevron-down menu-arrow"></i>{{ /children }}
             </a>
             
-            {{! ------------------ 二级菜单开始 ------------------ }}
             {{ #children }}
             <ul class="sub-menu">
                 {{ #. }}
                 <li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
                     <a href="{{ &url }}">
                         {{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
+                        {{ #children }}<i class="fas fa-chevron-down menu-arrow"></i>{{ /children }}
                     </a>
                     
-                    {{! ------------------ 三级菜单开始 ------------------ }}
                     {{ #children }}
                     <ul class="sub-menu">
                         {{ #. }}
@@ -104,12 +109,10 @@
                         {{ /. }}
                     </ul>
                     {{ /children }}
-                    {{! ------------------ 三级菜单结束 ------------------ }}
                 </li>
                 {{ /. }}
             </ul>
             {{ /children }}
-            {{! ------------------ 二级菜单结束 ------------------ }}
         </li>
         {{ /widgetMenuList }}
     </ul>
@@ -319,6 +322,27 @@
                     }
                 });
             });
+        </script>
+		 <script>
+        $(document).ready(function() {
+            // 找到所有包含子菜单的链接
+            $('.primary-menu .menu-item-has-children > a').on('click', function(e) {
+                // 阻止链接的默认跳转行为
+                e.preventDefault();
+
+                var $parentLi = $(this).parent('li');
+                var $subMenu = $parentLi.children('.sub-menu');
+                
+                // 切换 'menu-open' 类来控制箭头旋转
+                $parentLi.toggleClass('menu-open');
+                
+                // 用动画效果展开或折叠子菜单
+                $subMenu.slideToggle(300);
+
+                // （可选）关闭同级别的其他已打开的菜单
+                $parentLi.siblings('.menu-item-has-children').removeClass('menu-open').children('.sub-menu').slideUp(300);
+            });
+        });
         </script>
 
 		{{ &OPT.codeBeforBody }}
