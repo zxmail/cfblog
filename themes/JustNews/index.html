@@ -75,76 +75,88 @@
     </style>
 	</head>
 	<body class="archive paged category category-zhishi category-5 paged-2 category-paged-2 lang-cn el-boxed">
-		<header class="header">
-			<div class="container clearfix xyrj">
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-						<i class="fas fa-bars"></i>
-					</button>
-					<div class="logo">
-						{{ #OPT.logo }}
-						<a href="/" rel="home"><img src="{{ &OPT.logo }}" alt="{{ &OPT.siteName }}"></a>
-						{{ /OPT.logo }}
-						
-						{{ ^OPT.logo }}
-						<a href="/" rel="home"><img src="{{ &OPT.theme_github_path }}JustNews/files/logo2.png" alt="请自定义OPT.logo"></a>
-						{{ /OPT.logo }}
-					</div>
-				</div>
-					<div class="mobile-header-icons">
-						<a href="#" class="mobile-search-icon"><i class="fas fa-search"></i></a>
-					</div>
-				<div class="collapse navbar-collapse">
-<nav class="navbar-left primary-menu">
-    <ul id="menu-%e5%af%bc%e8%88%aa" class="nav navbar-nav wpcom-adv-menu">
-        {{ #widgetMenuList }}
-        <li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
-            <a href="{{ &url }}">
-                {{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
-                {{ #children }}<i class="fas fa-chevron-down menu-arrow"></i>{{ /children }}
-            </a>
-            
-            {{ #children }}
-            <ul class="sub-menu">
-                {{ #. }}
-                <li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
-                    <a href="{{ &url }}">
-                        {{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
-                        {{ #children }}<i class="fas fa-chevron-down menu-arrow"></i>{{ /children }}
-                    </a>
-                    
-                    {{ #children }}
-                    <ul class="sub-menu">
-                        {{ #. }}
-                        <li class="menu-item"><a href="{{ &url }}">{{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}</a></li>
-                        {{ /. }}
-                    </ul>
-                    {{ /children }}
-                </li>
-                {{ /. }}
-            </ul>
-            {{ /children }}
-        </li>
-        {{ /widgetMenuList }}
-    </ul>
-</nav>
-					<div class="header-search">
-						<form role="search" method="get" class="search-form" action="/">
-							<label>
-								<span class="screen-reader-text">搜索：</span>
-								<input type="search" class="search-field" placeholder="输入关键字..." value="" name="s" autocomplete="off">
-							</label>
-							<button type="submit" class="search-submit"><i class="fal fa-search"></i></button>
-						</form>
-					</div>
-					<div class="navbar-action pull-right">
-						<div id="j-user-wrap">
-							<a class="login cur" href="/admin">登录</a>
-						</div>
-					</div>
-				</div>
-			</div>
-		</header>
+<header class="header">
+    <div class="container clearfix xyrj">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                {{ #OPT.logo }}
+                <a href="/" rel="home"><img src="{{ &OPT.logo }}" alt="{{ &OPT.siteName }}"></a>
+                {{ /OPT.logo }}
+                
+                {{ ^OPT.logo }}
+                <a href="/" rel="home"><img src="{{ &OPT.theme_github_path }}JustNews/files/logo2.png" alt="请自定义OPT.logo"></a>
+                {{ /OPT.logo }}
+            </div>
+        </div>
+
+        <div class="mobile-header-icons">
+            <a href="#" class="mobile-search-icon"><i class="fas fa-search"></i></a>
+        </div>
+        
+        <div class="mobile-search-form">
+            <form role="search" method="get" class="search-form" action="/">
+                <label>
+                    <span class="screen-reader-text">搜索：</span>
+                    <input type="search" class="search-field" placeholder="输入关键字..." value="" name="s" autocomplete="off">
+                </label>
+                <button type="submit" class="search-submit"><i class="fal fa-search"></i></button>
+            </form>
+        </div>
+
+        <div class="collapse navbar-collapse">
+            <nav class="navbar-left primary-menu">
+                <ul id="menu-%e5%af%bc%e8%88%aa" class="nav navbar-nav wpcom-adv-menu">
+                    {{ #widgetMenuList }}
+                    <li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
+                        <a href="{{ &url }}">
+                            {{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
+                            {{ #children }}<i class="fas fa-chevron-down menu-arrow"></i>{{ /children }}
+                        </a>
+                        
+                        {{ #children }}
+                        <ul class="sub-menu">
+                            {{ #. }}
+                            <li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
+                                <a href="{{ &url }}">
+                                    {{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
+                                    {{ #children }}<i class="fas fa-chevron-down menu-arrow"></i>{{ /children }}
+                                </a>
+                                
+                                {{ #children }}
+                                <ul class="sub-menu">
+                                    {{ #. }}
+                                    <li class="menu-item"><a href="{{ &url }}">{{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}</a></li>
+                                    {{ /. }}
+                                </ul>
+                                {{ /children }}
+                            </li>
+                            {{ /. }}
+                        </ul>
+                        {{ /children }}
+                    </li>
+                    {{ /widgetMenuList }}
+                </ul>
+            </nav>
+            <div class="header-search">
+                <form role="search" method="get" class="search-form" action="/">
+                    <label>
+                        <span class="screen-reader-text">搜索：</span>
+                        <input type="search" class="search-field" placeholder="输入关键字..." value="" name="s" autocomplete="off">
+                    </label>
+                    <button type="submit" class="search-submit"><i class="fal fa-search"></i></button>
+                </form>
+            </div>
+            <div class="navbar-action pull-right">
+                <div id="j-user-wrap">
+                    <a class="login cur" href="/admin">登录</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
 		<div id="wrap">
 			<div class="container wrap">
 				<div class="main">
@@ -316,8 +328,8 @@
         
         <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
         <script>
-            // 使用您文件中的jQuery来编写
             $(document).ready(function() {
+                // 轮播图功能
                 $.ajax({
                     url: "/api/carousel",
                     type: 'GET',
@@ -345,31 +357,27 @@
                 // 新增：移动端搜索按钮点击事件
                 $('.mobile-search-icon').on('click', function(e) {
                     e.preventDefault();
-                    var $searchForm = $('.header-search');
-                    $searchForm.slideToggle(200); // 使用动画效果显示/隐藏
+                    $('.mobile-search-form').slideToggle(200); // 控制新的移动端专用搜索框
+                });
+
+                // 找到所有包含子菜单的链接，处理多级菜单的点击展开
+                $('.primary-menu .menu-item-has-children > a').on('click', function(e) {
+                    // 阻止链接的默认跳转行为
+                    e.preventDefault();
+
+                    var $parentLi = $(this).parent('li');
+                    var $subMenu = $parentLi.children('.sub-menu');
+                    
+                    // 切换 'menu-open' 类来控制箭头旋转
+                    $parentLi.toggleClass('menu-open');
+                    
+                    // 用动画效果展开或折叠子菜单
+                    $subMenu.slideToggle(300);
+
+                    // （可选）关闭同级别的其他已打开的菜单
+                    $parentLi.siblings('.menu-item-has-children').removeClass('menu-open').children('.sub-menu').slideUp(300);
                 });
             });
-        </script>
-        <script>
-        $(document).ready(function() {
-            // 找到所有包含子菜单的链接
-            $('.primary-menu .menu-item-has-children > a').on('click', function(e) {
-                // 阻止链接的默认跳转行为
-                e.preventDefault();
-
-                var $parentLi = $(this).parent('li');
-                var $subMenu = $parentLi.children('.sub-menu');
-                
-                // 切换 'menu-open' 类来控制箭头旋转
-                $parentLi.toggleClass('menu-open');
-                
-                // 用动画效果展开或折叠子菜单
-                $subMenu.slideToggle(300);
-
-                // （可选）关闭同级别的其他已打开的菜单
-                $parentLi.siblings('.menu-item-has-children').removeClass('menu-open').children('.sub-menu').slideUp(300);
-            });
-        });
         </script>
 		{{ &OPT.codeBeforBody }}
 	</body>
