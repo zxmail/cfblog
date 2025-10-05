@@ -26,64 +26,42 @@
 		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/icons-2.6.4.js?ver=6.1.2' id='wpcom-icons-js'></script>
 
 		{{ &OPT.codeBeforHead }}
- <style>
-	 @media (min-width: 1240px) {
-    .xyrj {
-        width: 1300px;
-    }
-        /* 1. Flexbox 布局，用于对齐菜单文字和箭头 */
-        .primary-menu .menu-item-has-children > a {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+	 <style>
+/* 10. 新增：海报轮播的左右箭头样式 */
+        .swiper-container.carousel .swiper-button-next,
+        .swiper-container.carousel .swiper-button-prev {
+            background-image: none !important; /* 强制移除默认的背景图 */
+            width: 40px;
+            height: 40px;
+            margin-top: -20px; /* 垂直居中 */
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 50%; /* 改为圆形 */
+            color: #fff !important;
+            transition: background-color 0.3s ease;
         }
 
-        /* 2. 子菜单样式重置 */
-        .primary-menu .sub-menu {
-            display: none;
-            position: absolute;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 100;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            min-width: 120px; /* 本次修改：将宽度从 180px 调小到 160px */
+        /* 鼠标悬停时改变背景色 */
+        .swiper-container.carousel .swiper-button-next:hover,
+        .swiper-container.carousel .swiper-button-prev:hover {
+            background-color: rgba(0, 0, 0, 0.4);
         }
 
-        /* 3. 悬停时显示子菜单 */
-        .primary-menu .menu-item-has-children:hover > .sub-menu {
-            display: block;
+        /* 使用 Font Awesome 图标替换默认箭头 */
+        .swiper-container.carousel .swiper-button-next:after,
+        .swiper-container.carousel .swiper-button-prev:after {
+            font-family: "Font Awesome 5 Pro"; /* cfblog项目中已包含此字体 */
+            font-size: 16px;
+            font-weight: 900; /* 使用 Solid 样式的图标 */
         }
 
-        /* 4. 定位三级及更深层次的菜单 */
-        .primary-menu .sub-menu .menu-item-has-children > .sub-menu {
-            top: 0;
-            left: 100%;
+        /* 定义左箭头的图标 */
+        .swiper-container.carousel .swiper-button-prev:after {
+            content: '\f053';
         }
 
-        /* 5. 子菜单链接样式 */
-        .primary-menu .sub-menu a {
-            padding: 10px 12px; /* 本次修改：将垂直间距从 8px 调小到 6px */
-            display: block;
-            white-space: nowrap;
-        }
-        
-        /* 6. 箭头图标样式 */
-        .menu-arrow {
-            margin-left: 8px;
-            font-size: 0.8em;
-            transition: transform 0.3s ease;
-        }
-
-        /* 7. 悬停时旋转箭头 */
-        .primary-menu .menu-item-has-children:hover > a > .menu-arrow {
-            transform: rotate(-90deg);
-        }
-        
-        /* 8. 新增：调整菜单名前置图标的间距 */
-        .primary-menu a > i:first-child {
-            margin-right: 6px; /* 为图标和文字之间增加 6px 的右边距 */
+        /* 定义右箭头的图标 */
+        .swiper-container.carousel .swiper-button-next:after {
+            content: '\f054';
         }
     </style>
 	</head>
