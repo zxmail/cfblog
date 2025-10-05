@@ -54,22 +54,30 @@
             <a href="{{ &url }}">
                 {{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
             </a>
+            
+            {{! ------------------ 二级菜单开始 ------------------ }}
             {{ #children }}
             <ul class="sub-menu">
-                {{! 此处为二级菜单循环 }}
+                {{ #. }}
                 <li class="menu-item {{ #children }}menu-item-has-children{{ /children }}">
                     <a href="{{ &url }}">
                         {{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}
                     </a>
+                    
+                    {{! ------------------ 三级菜单开始 ------------------ }}
                     {{ #children }}
                     <ul class="sub-menu">
-                        {{! 此处为三级菜单循环 }}
+                        {{ #. }}
                         <li class="menu-item"><a href="{{ &url }}">{{ #icon }}<i class="{{ &icon }}"></i> {{ /icon }}{{ &title }}</a></li>
+                        {{ /. }}
                     </ul>
                     {{ /children }}
+                    {{! ------------------ 三级菜单结束 ------------------ }}
                 </li>
+                {{ /. }}
             </ul>
             {{ /children }}
+            {{! ------------------ 二级菜单结束 ------------------ }}
         </li>
         {{ /widgetMenuList }}
     </ul>
