@@ -17226,7 +17226,7 @@ body>header.header .logo img {
     -webkit-appearance: none; /* 移除在Safari等浏览器上的默认样式 */
 }
 .search-field:focus {
-    background-color: #fff;
+    background-color: #f5f5f5;
     border-color: #ccc;
     outline: none;
 }
