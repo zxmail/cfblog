@@ -341,9 +341,16 @@
                         }
                     }
                 });
+
+                // 新增：移动端搜索按钮点击事件
+                $('.mobile-search-icon').on('click', function(e) {
+                    e.preventDefault();
+                    var $searchForm = $('.header-search');
+                    $searchForm.slideToggle(200); // 使用动画效果显示/隐藏
+                });
             });
         </script>
- <script>
+        <script>
         $(document).ready(function() {
             // 找到所有包含子菜单的链接
             $('.primary-menu .menu-item-has-children > a').on('click', function(e) {
