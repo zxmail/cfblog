@@ -27,14 +27,14 @@
 
 		{{ &OPT.codeBeforHead }}
  <style>
-        /* 1. 使用 Flexbox 布局，强制菜单文字和箭头在同一行对齐 */
+        /* 1. Flexbox 布局，用于对齐菜单文字和箭头 */
         .primary-menu .menu-item-has-children > a {
             display: flex;
-            justify-content: space-between; /* 文字在左，箭头在右 */
-            align-items: center; /* 垂直居中 */
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* 2. 重置子菜单样式并默认隐藏 */
+        /* 2. 子菜单样式重置 */
         .primary-menu .sub-menu {
             display: none;
             position: absolute;
@@ -44,10 +44,10 @@
             list-style: none;
             padding: 0;
             margin: 0;
-            min-width: 180px;
+            min-width: 160px; /* 本次修改：将宽度从 180px 调小到 160px */
         }
 
-        /* 3. 【核心】改回悬停时显示子菜单 */
+        /* 3. 悬停时显示子菜单 */
         .primary-menu .menu-item-has-children:hover > .sub-menu {
             display: block;
         }
@@ -60,21 +60,26 @@
 
         /* 5. 子菜单链接样式 */
         .primary-menu .sub-menu a {
-            padding: 8px 15px;
+            padding: 6px 15px; /* 本次修改：将垂直间距从 8px 调小到 6px */
             display: block;
             white-space: nowrap;
         }
         
-        /* 6. 箭头图标初始样式和动画 */
+        /* 6. 箭头图标样式 */
         .menu-arrow {
             margin-left: 8px;
             font-size: 0.8em;
             transition: transform 0.3s ease;
         }
 
-        /* 7. 【核心】改回悬停时旋转箭头 */
+        /* 7. 悬停时旋转箭头 */
         .primary-menu .menu-item-has-children:hover > a > .menu-arrow {
             transform: rotate(-90deg);
+        }
+        
+        /* 8. 新增：调整菜单名前置图标的间距 */
+        .primary-menu a > i:first-child {
+            margin-right: 6px; /* 为图标和文字之间增加 6px 的右边距 */
         }
     </style>
 	</head>
