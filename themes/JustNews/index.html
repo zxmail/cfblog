@@ -81,6 +81,21 @@
         .primary-menu a > i:first-child {
             margin-right: 6px; /* 为图标和文字之间增加 6px 的右边距 */
         }
+	  /* 9. 新增：页头内容垂直居中对齐 (仅在桌面端生效) */
+    @media (min-width: 992px) {
+        .header .container {
+            display: flex;
+            align-items: center; /* 核心：让所有子元素垂直居中 */
+        }
+        .header .navbar-collapse {
+            display: flex !important; /* 覆盖默认样式，使其在桌面端也表现为flex容器 */
+            align-items: center;
+            flex-grow: 1; /* 让此区域占据剩余空间 */
+        }
+        .header .navbar-action {
+            margin-left: auto; /* 将登录按钮推到最右侧 */
+        }
+    }
     </style>
 	</head>
 	<body class="archive paged category category-zhishi category-5 paged-2 category-paged-2 lang-cn el-boxed">
