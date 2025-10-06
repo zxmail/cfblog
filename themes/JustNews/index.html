@@ -37,27 +37,22 @@
         background-color: rgba(0, 0, 0, 0.2);
         border-radius: 50%;
         color: #fff !important;
-        transition: all 0.3s ease; /* 修改：让所有变化的过渡都更平滑 */
-        
-        /* 本次新增：默认隐藏箭头 */
+        transition: all 0.3s ease;
         opacity: 0;
         visibility: hidden;
     }
     
-    /* 本次新增：当鼠标悬停在整个轮播图上时，显示箭头 */
     .swiper-container.carousel:hover .swiper-button-next,
     .swiper-container.carousel:hover .swiper-button-prev {
         opacity: 1;
         visibility: visible;
     }
 
-    /* 鼠标悬停在箭头上时改变背景色 */
     .swiper-container.carousel .swiper-button-next:hover,
     .swiper-container.carousel .swiper-button-prev:hover {
         background-color: rgba(0, 0, 0, 0.4);
     }
 
-    /* 使用 Font Awesome 图标替换默认箭头 */
     .swiper-container.carousel .swiper-button-next:after,
     .swiper-container.carousel .swiper-button-prev:after {
         font-family: "Font Awesome 5 Pro";
@@ -73,9 +68,23 @@
         content: '\f054';
     }
 
-    /* 新增：默认隐藏移动端搜索框 */
+    /* 【修改】将header设为相对定位，作为弹出式搜索框的定位父级 */
+    .header {
+        position: relative;
+    }
+
+    /* 【修改】移动端搜索框样式，实现覆盖式向下弹出 */
     .mobile-search-form {
-        display: none;
+        display: none; /* 初始隐藏 */
+        position: absolute;
+        top: 100%; /* 定位在header元素的正下方 */
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        background: #fff; /* 设置背景色以覆盖下方内容 */
+        padding: 15px;
+        box-sizing: border-box; /* 确保padding不会撑大宽度 */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* 添加阴影增加层次感 */
     }
 
     @media (max-width: 1240px) {
@@ -101,7 +110,6 @@
             left: 93%;
             transform: translate(-50%, -50%);
         }
-        /* 新增：屏幕小于1240px时隐藏PC端搜索框 */
         .header-search {
             display: none;
         }
@@ -344,7 +352,7 @@
 		</div>
 		<link rel='stylesheet' id='lazyload-spinner-css' href='{{ &OPT.theme_github_path }}JustNews/files/lazyload.css?ver=3.4.9' type='text/css' media='all' />
 		<script type='text/javascript' id='main-js-extra'>/* <![CDATA[ */
-			var _wpcom_js = {"webp":"","ajaxurl":"","theme_url":"{{ &OPT.theme_github_path }}JustNews/","slide_speed":"5000","user_card_height":"356","video_height":"482","fixed_sidebar":"1","login_url":"/admin","register_url":"/admin","errors":{"require":"\u4e0d\u80fd\u4e3a\u7a7a","email":"\u8bf7\u8f93\u5165\u6b63\u786e\u7684\u7535\u5b50\u90ae\u7bb1","pls_enter":"\u8bf7\u8f93\u5165","password":"\u5bc6\u7801\u5fc5\u987b\u4e3a6~32\u4e2a\u5b57\u7b26","passcheck":"\u4e24\u6b21\u5bc6\u7801\u8f93\u5165\u4e0d\u4e00\u81´","phone":"\u8bf7\u8f93\u5165\u6b63\u786e\u7684\u624b\u673a\u53f7\u7801","terms":"Please read and agree with the terms","sms_code":"\u9a8c\u8bc1\u7801\u9519\u8bef","captcha_verify":"\u8bf7\u70b9\u51fb\u6309\u94ae\u8fdb\u884c\u9a8c\u8bc1","captcha_fail":"\u70b9\u51fb\u9a8c\u8bc1\u5931\u8d25\uff0c\u8bf7\u91cd\u8bd5","nonce":"\u968f\u673a\u6570\u6821\u9a8c\u5931\u8d25","req_error":"\u8bf7\u6c42\u5931\u8d25"},"follow_btn":"<i class=\"wpcom-icon wi\"><svg aria-hidden=\"true\"><use xlink:href=\"#wi-add\"><\/use><\/svg><\/i>\u5173\u6ce8","followed_btn":"\u5df2\u5173\u6ce8","user_card":"1"};
+			var _wpcom_js = {"webp":"","ajaxurl":"","theme_url":"{{ &OPT.theme_github_path }}JustNews/","slide_speed":"5000","user_card_height":"356","video_height":"482","fixed_sidebar":"1","login_url":"/admin","register_url":"/admin","errors":{"require":"\u4e0d\u80fd\u4e3a\u7a7a","email":"\u8bf7\u8f93\u5165\u6b63\u786e\u76\u7535\u5b50\u90ae\u7bb1","pls_enter":"\u8bf7\u8f93\u5165","password":"\u5bc6\u7801\u5fc5\u987b\u4e3a6~32\u4e2a\u5b57\u7b26","passcheck":"\u4e24\u6b21\u5bc6\u7801\u8f93\u5165\u4e0d\u4e00\u81´","phone":"\u8bf7\u8f93\u5165\u6b63\u786e\u76\u624b\u673a\u53f7\u7801","terms":"Please read and agree with the terms","sms_code":"\u9a8c\u8bc1\u7801\u9519\u8bef","captcha_verify":"\u8bf7\u70b9\u51fb\u6309\u94ae\u8fdb\u884c\u9a8c\u8bc1","captcha_fail":"\u70b9\u51fb\u9a8c\u8bc1\u5931\u8d25\uff0c\u8bf7\u91cd\u8bd5","nonce":"\u968f\u673a\u6570\u6821\u9a8c\u5931\u8d25","req_error":"\u8bf7\u6c42\u5931\u8d25"},"follow_btn":"<i class=\"wpcom-icon wi\"><svg aria-hidden=\"true\"><use xlink:href=\"#wi-add\"><\/use><\/svg><\/i>\u5173\u6ce8","followed_btn":"\u5df2\u5173\u6ce8","user_card":"1"};
 			/* ]]> */
 			</script>
 		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/main.js?ver=6.1.2' id='main-js'></script>
@@ -392,27 +400,25 @@
                     }
                 });
 
-                // 新增：移动端搜索按钮点击事件
+                // 【新增】修复移动端汉堡菜单点击事件
+                $('.navbar-toggle').on('click', function(e) {
+                    e.preventDefault();
+                    $('.navbar-collapse').slideToggle(300);
+                });
+
+                // 移动端搜索按钮点击事件
                 $('.mobile-search-icon').on('click', function(e) {
                     e.preventDefault();
-                    $('.mobile-search-form').slideToggle(200); // 控制新的移动端专用搜索框
+                    $('.mobile-search-form').slideToggle(200);
                 });
 
                 // 找到所有包含子菜单的链接，处理多级菜单的点击展开
                 $('.primary-menu .menu-item-has-children > a').on('click', function(e) {
-                    // 阻止链接的默认跳转行为
                     e.preventDefault();
-
                     var $parentLi = $(this).parent('li');
                     var $subMenu = $parentLi.children('.sub-menu');
-                    
-                    // 切换 'menu-open' 类来控制箭头旋转
                     $parentLi.toggleClass('menu-open');
-                    
-                    // 用动画效果展开或折叠子菜单
                     $subMenu.slideToggle(300);
-
-                    // （可选）关闭同级别的其他已打开的菜单
                     $parentLi.siblings('.menu-item-has-children').removeClass('menu-open').children('.sub-menu').slideUp(300);
                 });
             });
