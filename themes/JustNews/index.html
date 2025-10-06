@@ -96,6 +96,117 @@
   	transform: translate(-50%, -50%);
         }
     }
+		 /* 12. 移动端页头新布局 */
+@media (max-width: 991px) {
+    .header .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative; /* For search form positioning */
+    }
+
+    .header .navbar-header {
+        display: flex;
+        align-items: center;
+        flex-grow: 1; /* Allows logo to center */
+        justify-content: center; /* Center the logo */
+        padding-left: 40px; /* Space for hamburger */
+        padding-right: 40px; /* Space for search */
+    }
+
+    .header .logo {
+        /* The logo is now centered by its parent's justify-content */
+    }
+
+    .header .navbar-toggle {
+        display: block;
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        margin: 0;
+    }
+
+    .header .mobile-header-icons {
+        display: flex;
+        align-items: center;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .mobile-header-icons > a {
+        font-size: 18px;
+        color: #555;
+        padding: 5px;
+    }
+
+    /* Hide desktop elements on mobile */
+    .header .header-search,
+    .header .navbar-action {
+        display: none;
+    }
+
+    /* Styles for the mobile search form that appears on click */
+    .mobile-search-form {
+        display: none; /* Initially hidden */
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        padding: 10px 15px;
+        box-shadow: 0 4px 5px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
+    
+    .mobile-search-form .search-form {
+        display: flex;
+    }
+
+    .mobile-search-form .search-field {
+        flex-grow: 1;
+        -webkit-appearance: none;
+        border: 1px solid #ddd;
+        padding: 8px 10px;
+        border-radius: 3px;
+    }
+    .mobile-search-form .search-field:focus {
+        border-color: #ccc;
+        outline: none;
+    }
+
+    .mobile-search-form .search-submit {
+        position: static;
+        background: #333;
+        color: #fff;
+        border: none;
+        padding: 0 15px;
+        margin-left: 5px;
+        border-radius: 3px;
+    }
+
+    /* Adjust the main menu dropdown */
+    .header .navbar-collapse {
+        position: absolute;
+        top: 50px; /* Adjust based on your header height */
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+        box-shadow: 0 5px 5px -5px rgba(0,0,0,0.2);
+        border-top: 1px solid #f0f0f0;
+        z-index: 999;
+    }
+}
+
+/* Hide mobile elements on desktop */
+@media (min-width: 992px) {
+    .mobile-header-icons,
+    .mobile-search-form {
+        display: none;
+    }
+}
     </style>
 	</head>
 	<body class="archive paged category category-zhishi category-5 paged-2 category-paged-2 lang-cn el-boxed">
@@ -397,6 +508,29 @@
                     $parentLi.siblings('.menu-item-has-children').removeClass('menu-open').children('.sub-menu').slideUp(300);
                 });
             });
+
+			
+			// Mobile search toggle
+$(document).ready(function() {
+    // Check if the mobile search form exists, if not, create and append it.
+    if ($('.mobile-search-form').length === 0) {
+        var searchFormHtml = '<div class="mobile-search-form">' +
+                                 '<form role="search" method="get" class="search-form" action="">' +
+                                     '<label>' +
+                                         '<span class="screen-reader-text">搜索：</span>' +
+                                         '<input type="search" class="search-field" placeholder="输入关键字…" value="" name="s">' +
+                                     '</label>' +
+                                     '<input type="submit" class="search-submit" value="搜索">' +
+                                 '</form>' +
+                             '</div>';
+        $('.header .container').append(searchFormHtml);
+    }
+
+    $('.mobile-header-icons .fa-search').parent('a').on('click', function(e) {
+        e.preventDefault();
+        $('.mobile-search-form').slideToggle('fast');
+    });
+});
         </script>
 		{{ &OPT.codeBeforBody }}
 	</body>
