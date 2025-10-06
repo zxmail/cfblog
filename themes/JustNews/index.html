@@ -27,7 +27,7 @@
 
 		{{ &OPT.codeBeforHead }}
 	 <style>
-	/* 10. 海报轮播的左右箭头样式 (最终更新版) */
+    /* 10. 海报轮播的左右箭头样式 (最终更新版) */
     .swiper-container.carousel .swiper-button-next,
     .swiper-container.carousel .swiper-button-prev {
         background-image: none !important;
@@ -72,28 +72,38 @@
     .swiper-container.carousel .swiper-button-next:after {
         content: '\f054';
     }
-@media (max-width: 1240px) {
-	.navbar-header {
-		margin: 50px 0 0 0;
-        float: none;
+
+    /* 新增：默认隐藏移动端搜索框 */
+    .mobile-search-form {
+        display: none;
+    }
+
+    @media (max-width: 1240px) {
+        .navbar-header {
+            margin: 50px 0 0 0;
+            float: none;
         }
-	.xyrjleft {
- 	position: absolute;     /* 绝对定位 */
- 	top: 50%;               /* 距离容器顶部 50% */
-  	left: 7%;              /* 距离容器左侧 50% */
-  	transform: translate(-50%, -50%);
+        .xyrjleft {
+            position: absolute;
+            top: 50%;
+            left: 7%;
+            transform: translate(-50%, -50%);
         }
-	.xyrjright {
- 	position: absolute;     /* 绝对定位 */
- 	top: 50%;               /* 距离容器顶部 50% */
-  	left: 50%;              /* 距离容器左侧 50% */
-  	transform: translate(-50%, -50%);
+        .xyrjright {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
-	.xyrjcenter {
- 	position: absolute;     /* 绝对定位 */
- 	top: 50%;               /* 距离容器顶部 50% */
-  	left: 93%;              /* 距离容器左侧 50% */
-  	transform: translate(-50%, -50%);
+        .xyrjcenter {
+            position: absolute;
+            top: 50%;
+            left: 93%;
+            transform: translate(-50%, -50%);
+        }
+        /* 新增：屏幕小于1240px时隐藏PC端搜索框 */
+        .header-search {
+            display: none;
         }
     }
     </style>
@@ -334,7 +344,7 @@
 		</div>
 		<link rel='stylesheet' id='lazyload-spinner-css' href='{{ &OPT.theme_github_path }}JustNews/files/lazyload.css?ver=3.4.9' type='text/css' media='all' />
 		<script type='text/javascript' id='main-js-extra'>/* <![CDATA[ */
-			var _wpcom_js = {"webp":"","ajaxurl":"","theme_url":"{{ &OPT.theme_github_path }}JustNews/","slide_speed":"5000","user_card_height":"356","video_height":"482","fixed_sidebar":"1","login_url":"/admin","register_url":"/admin","errors":{"require":"\u4e0d\u80fd\u4e3a\u7a7a","email":"\u8bf7\u8f93\u5165\u6b63\u786e\u7684\u7535\u5b50\u90ae\u7bb1","pls_enter":"\u8bf7\u8f93\u5165","password":"\u5bc6\u7801\u5fc5\u987b\u4e3a6~32\u4e2a\u5b57\u7b26","passcheck":"\u4e24\u6b21\u5bc6\u7801\u8f93\u5165\u4e0d\u4e00\u81f4","phone":"\u8bf7\u8f93\u5165\u6b63\u786e\u7684\u624b\u673a\u53f7\u7801","terms":"Please read and agree with the terms","sms_code":"\u9a8c\u8bc1\u7801\u9519\u8bef","captcha_verify":"\u8bf7\u70b9\u51fb\u6309\u94ae\u8fdb\u884c\u9a8c\u8bc1","captcha_fail":"\u70b9\u51fb\u9a8c\u8bc1\u5931\u8d25\uff0c\u8bf7\u91cd\u8bd5","nonce":"\u968f\u673a\u6570\u6821\u9a8c\u5931\u8d25","req_error":"\u8bf7\u6c42\u5931\u8d25"},"follow_btn":"<i class=\"wpcom-icon wi\"><svg aria-hidden=\"true\"><use xlink:href=\"#wi-add\"><\/use><\/svg><\/i>\u5173\u6ce8","followed_btn":"\u5df2\u5173\u6ce8","user_card":"1"};
+			var _wpcom_js = {"webp":"","ajaxurl":"","theme_url":"{{ &OPT.theme_github_path }}JustNews/","slide_speed":"5000","user_card_height":"356","video_height":"482","fixed_sidebar":"1","login_url":"/admin","register_url":"/admin","errors":{"require":"\u4e0d\u80fd\u4e3a\u7a7a","email":"\u8bf7\u8f93\u5165\u6b63\u786e\u7684\u7535\u5b50\u90ae\u7bb1","pls_enter":"\u8bf7\u8f93\u5165","password":"\u5bc6\u7801\u5fc5\u987b\u4e3a6~32\u4e2a\u5b57\u7b26","passcheck":"\u4e24\u6b21\u5bc6\u7801\u8f93\u5165\u4e0d\u4e00\u81´","phone":"\u8bf7\u8f93\u5165\u6b63\u786e\u7684\u624b\u673a\u53f7\u7801","terms":"Please read and agree with the terms","sms_code":"\u9a8c\u8bc1\u7801\u9519\u8bef","captcha_verify":"\u8bf7\u70b9\u51fb\u6309\u94ae\u8fdb\u884c\u9a8c\u8bc1","captcha_fail":"\u70b9\u51fb\u9a8c\u8bc1\u5931\u8d25\uff0c\u8bf7\u91cd\u8bd5","nonce":"\u968f\u673a\u6570\u6821\u9a8c\u5931\u8d25","req_error":"\u8bf7\u6c42\u5931\u8d25"},"follow_btn":"<i class=\"wpcom-icon wi\"><svg aria-hidden=\"true\"><use xlink:href=\"#wi-add\"><\/use><\/svg><\/i>\u5173\u6ce8","followed_btn":"\u5df2\u5173\u6ce8","user_card":"1"};
 			/* ]]> */
 			</script>
 		<script type='text/javascript' src='{{ &OPT.theme_github_path }}JustNews/files/main.js?ver=6.1.2' id='main-js'></script>
